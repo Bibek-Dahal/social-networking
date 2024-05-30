@@ -1,12 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-  accessTokenLifeTime,
-  refreshTokenLifeTime,
-  saltRound,
-} from "../constants.js";
+import { saltRound } from "../constants.js";
 import "dotenv/config";
+import { v4 as uuidv4 } from "uuid";
 const { Schema } = mongoose;
 
 const userSchema = new Schema(
@@ -42,10 +39,11 @@ userSchema.methods.generateJwtTokens = function () {
   const user = this;
 
   const jwtPromise = new Promise((resolve, reject) => {
+    const uuid = uuidv4();
     try {
       const accessToken = jwt.sign(
         {
-          exp: accessTokenLifeTime,
+          exp: Math.floor(Date.now() / 1000) + 40,
           data: {
             id: user._id,
             userName: user.userName,
@@ -56,8 +54,9 @@ userSchema.methods.generateJwtTokens = function () {
       );
       const refreshToken = jwt.sign(
         {
-          exp: refreshTokenLifeTime,
+          exp: Math.floor(Date.now() / 1000) + 15 * 24 * 60 * 60,
           data: {
+            uuid: uuid,
             id: this._id,
             userName: this.userName,
             email: this.email,
@@ -65,7 +64,7 @@ userSchema.methods.generateJwtTokens = function () {
         },
         process.env.JWT_SECRET
       );
-      resolve({ accessToken, refreshToken });
+      resolve({ accessToken, refreshToken, uuid });
     } catch (error) {
       reject({ message: "Jwt token cant be created." });
     }

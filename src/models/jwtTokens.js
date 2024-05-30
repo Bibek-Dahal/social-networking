@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { refreshTokenLifeTime } from "../constants.js";
+
 const { Schema } = mongoose;
 
 const jwtSchema = new Schema({
@@ -9,8 +9,8 @@ const jwtSchema = new Schema({
     required: true,
   },
 
-  token: {
-    type: String,
+  uuid: {
+    type: Schema.Types.UUID,
     required: true,
   },
   isBlackListed: {
@@ -19,10 +19,14 @@ const jwtSchema = new Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
-    expires: 10,
+    default: Date.now,
   },
 });
+
+jwtSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: Math.floor(Date.now() / 1000) + 15 * 24 * 60 * 60 }
+);
 
 const Jwt = mongoose.model("Jwt", jwtSchema);
 export { Jwt };

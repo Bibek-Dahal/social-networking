@@ -2,7 +2,8 @@ import express from "express";
 import { connectDb } from "./src/dbconfig/connect_db.js";
 import bodyParser from "body-parser";
 import auth from "./src/routes/auth.js";
-
+import user from "./src/routes/user.js";
+import "./src/passport/stratigies/jwt_strategy.js";
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -10,7 +11,8 @@ const PORT = process.env.PORT || 8000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use("/account", auth);
+app.use("/api/account", auth);
+app.use("/api/user", user);
 
 app.get("/", async (req, res) => {
   res.send("Hello World");
