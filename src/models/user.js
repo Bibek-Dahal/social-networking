@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 import { saltRound } from "../constants.js";
 import "dotenv/config";
 import { v4 as uuidv4 } from "uuid";
+import { accessTokenLifeTime, refreshTokenLifeTime } from "../constants.js";
+import { Profile } from "./profile.js";
+
 const { Schema } = mongoose;
 
 const userSchema = new Schema(
@@ -43,7 +46,7 @@ userSchema.methods.generateJwtTokens = function () {
     try {
       const accessToken = jwt.sign(
         {
-          exp: Math.floor(Date.now() / 1000) + 40,
+          exp: Math.floor(Date.now() / 1000) + accessTokenLifeTime,
           data: {
             id: user._id,
             userName: user.userName,
@@ -54,7 +57,7 @@ userSchema.methods.generateJwtTokens = function () {
       );
       const refreshToken = jwt.sign(
         {
-          exp: Math.floor(Date.now() / 1000) + 15 * 24 * 60 * 60,
+          exp: Math.floor(Date.now() / 1000) + refreshTokenLifeTime,
           data: {
             uuid: uuid,
             id: this._id,
@@ -87,6 +90,24 @@ userSchema.pre("save", function (next) {
     user.password = hash;
     next();
   });
+});
+
+userSchema.post("save", async function (doc, next) {
+  console.log("user post save called ");
+  const user = doc;
+  try {
+    const profile = await Profile.findOne({ user: user._id });
+    if (profile) {
+      console.log("profile==", profile);
+      next();
+    } else {
+      Profile.create({
+        user: user._id,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 const User = mongoose.model("User", userSchema);

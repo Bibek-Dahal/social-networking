@@ -40,4 +40,18 @@ export class AuthValidator {
 
     await showValidationsError(req, res, next, schema);
   };
+
+  static logout = async (req, res, next) => {
+    const schema = Joi.object({
+      uuid: Joi.string().required(),
+    });
+    await showValidationsError(req, res, next, schema);
+  };
+
+  static refreshToken = async (req, res, next) => {
+    const schema = Joi.object({
+      refreshToken: Joi.string().required(),
+    });
+    await showValidationsError(req, res, next, schema);
+  };
 }

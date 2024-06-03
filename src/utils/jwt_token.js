@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-
+import { accessTokenLifeTime } from "../constants.js";
 export const verifyJwtToken = function (token) {
   const promise = new Promise((resolve, reject) => {
     try {
@@ -23,7 +23,7 @@ export const generateAccessToken = (user) => {
     try {
       const accessToken = jwt.sign(
         {
-          exp: Math.floor(Date.now() / 1000) + 40,
+          exp: Math.floor(Date.now() / 1000) + accessTokenLifeTime,
           data: {
             id: user.id,
             userName: user.userName,

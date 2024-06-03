@@ -1,26 +1,22 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const postSchema = new Schema(
+const profileSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    title: {
+    avatar: {
       type: String,
-      required: true,
+    },
+    bio: {
+      type: String,
       trim: true,
     },
-    description: {
-      type: String,
-      required: false,
-      trim: true,
-    },
-    image: {
-      type: String,
-      required: false,
+    hobbies: {
+      type: Array,
     },
   },
   {
@@ -28,5 +24,6 @@ const postSchema = new Schema(
   }
 );
 
-const Post = mongoose.model("Post", postSchema);
-export { Post };
+const Profile = mongoose.model("Profile", profileSchema);
+
+export { Profile };

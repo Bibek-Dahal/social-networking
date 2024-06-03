@@ -8,6 +8,7 @@ router.post("/register", [AuthValidator.register, AuthController.register]);
 router.post("/login", [AuthValidator.login, AuthController.login]);
 router.post("/logout", [
   passport.authenticate("jwt", { session: false }),
+  AuthValidator.logout,
   AuthController.logout,
 ]);
 router.post("/logout-from-all-devices", [
