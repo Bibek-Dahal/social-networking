@@ -2,7 +2,7 @@ import passport from "passport";
 export const authMiddleware = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user, info) => {
     if (err) {
-      console.log("auth error==", err);
+      // console.log("auth error==", err);
       return res.status(500).send({
         success: false,
         message: "Something went wrong",

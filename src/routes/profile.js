@@ -14,4 +14,6 @@ router.patch("/", [
   ProfileController.updateProfle,
 ]);
 
+router.get("/", [ProfileController.getProfile]);
+
 export default router;
