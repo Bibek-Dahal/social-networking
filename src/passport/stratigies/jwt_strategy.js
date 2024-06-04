@@ -9,8 +9,10 @@ opts.secretOrKey = process.env.JWT_SECRET;
 // export const jwtStrategy =
 passport.use(
   new JwtStrategy(opts, async function (jwt_payload, done) {
+    //Note always use findById for querying with id
     try {
-      const user = await User.findOne({ id: jwt_payload._id });
+      const user = await User.findById(jwt_payload.data.id);
+
       if (user) {
         return done(null, user);
       } else {

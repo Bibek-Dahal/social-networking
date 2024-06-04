@@ -6,6 +6,7 @@ import "dotenv/config";
 import { v4 as uuidv4 } from "uuid";
 import { accessTokenLifeTime, refreshTokenLifeTime } from "../constants.js";
 import { Profile } from "./profile.js";
+import { userRoles } from "../constants.js";
 
 const { Schema } = mongoose;
 
@@ -22,6 +23,11 @@ const userSchema = new Schema(
       unique: true,
       required: true,
       trim: true,
+    },
+    role: {
+      type: "String",
+      enum: [userRoles.Admin, userRoles.User],
+      default: userRoles.User,
     },
     password: {
       type: String,

@@ -6,6 +6,8 @@ import user from "./src/routes/user.js";
 import profile from "./src/routes/profile.js";
 import post from "./src/routes/post.js";
 import comment from "./src/routes/comment.js";
+import home from "./src/routes/home.js";
+import adminUser from "./src/routes/admin/user.js";
 import "./src/passport/stratigies/jwt_strategy.js";
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -19,6 +21,9 @@ app.use("/api/user", user);
 app.use("/api/profile", profile);
 app.use("/api/post", post);
 app.use("/api/comment", comment);
+app.use("/api/home", home);
+
+app.use("/api/admin/users", adminUser);
 
 app.get("/", async (req, res) => {
   res.send("Hello World");

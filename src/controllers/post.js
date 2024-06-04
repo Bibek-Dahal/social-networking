@@ -51,11 +51,22 @@ export class PostController {
   static deletePost = async (req, res) => {
     const { id } = req.params;
     try {
-      await Post.findOneAndDelete({ _id: id, user: req.user.id });
-      res.status(204).send({
-        success: true,
-        message: "Post deleted successfully",
+      const deletedPost = await Post.findOneAndDelete({
+        _id: id,
+        user: req.user.id,
       });
+      if (deletedPost) {
+        res.status(200).send({
+          success: true,
+          message: "Post deleted successfully",
+        });
+      } else {
+        res.status(403).send({
+          success: false,
+          message: "Post cant be deleted.",
+        });
+      }
+      console.log("deleted post==", deletedPost);
     } catch (error) {
       res.status(500).send({
         success: false,

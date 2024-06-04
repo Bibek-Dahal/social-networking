@@ -57,11 +57,21 @@ export class CommentController {
   static deleteComment = async (req, res) => {
     const { commentId } = req.params;
     try {
-      await Comment.findOneAndDelete({ _id: commentId, user: req.user.id });
-      res.status(204).send({
-        message: "Comment Deleted Successfully",
-        success: true,
+      const deletedComment = await Comment.findOneAndDelete({
+        _id: commentId,
+        user: req.user.id,
       });
+      if (deletedComment) {
+        return res.status(200).send({
+          message: "Comment Deleted Successfully",
+          success: true,
+        });
+      } else {
+        return res.status(403).send({
+          message: "Comment couldnot be deleted",
+          success: true,
+        });
+      }
     } catch (error) {
       res.status(500).send({
         message: "Something went wrong",

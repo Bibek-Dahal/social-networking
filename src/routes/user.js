@@ -1,12 +1,10 @@
 import express from "express";
-import { authMiddleware } from "../middlewares/auth.js";
 import { UserController } from "../controllers/user.js";
 import passport from "passport";
 const router = express.Router();
 
-router.get("/me", [
-  passport.authenticate("jwt", { session: false }),
-  UserController.getLoggedInUser,
-]);
-
+router.use(passport.authenticate("jwt", { session: false }));
+router.get("/me", [UserController.getLoggedInUser]);
+router.post("/follow/:userId", UserController.followUser);
+router.post("/unfollow/:userId", UserController.unfollowUser);
 export default router;
