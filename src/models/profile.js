@@ -10,13 +10,16 @@ const profileSchema = new Schema(
     },
     avatar: {
       type: String,
+      defaul: null,
     },
     bio: {
       type: String,
       trim: true,
+      default: null,
     },
     hobbies: {
       type: Array,
+      default: [],
     },
   },
   {

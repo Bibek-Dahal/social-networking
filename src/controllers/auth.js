@@ -94,16 +94,24 @@ export class AuthController {
       //check if token is vlid
       const jwtToken = await verifyJwtToken(refreshToken);
 
+      console.log("jwt-token==", jwtToken);
+
       if (!jwtToken) {
         return res.status(400).send({
           message: "Token expired",
           success: false,
         });
       }
-      const token = await Jwt.findOne({ token: jwtToken.uuid });
+      const token = await Jwt.findOne({ uuid: jwtToken.data.uuid });
+      if (!token) {
+        return res.status(404).send({
+          message: "Token doesnot exists",
+          success: false,
+        });
+      }
       if (token.isBlackListed) {
         return res.status(400).send({
-          message: "Unable to login",
+          message: "Unable to login. Either token is expired or blacklisted",
           success: false,
         });
       } else {
@@ -130,26 +138,26 @@ export class AuthController {
   };
 
   static logout = async (req, res) => {
-    const { uuid } = req.body;
+    const { refreshToken } = req.body;
 
     try {
-      const token = await Jwt.findOne({ uuid: uuid });
+      const jwtToken = await verifyJwtToken(refreshToken);
 
-      const isSameUser = token.user.toString() === req.user.id;
-      if (isSameUser) {
-        token.isBlackListed = true;
-        token.save();
-        return res.status(200).send({
-          message: "User log out successfull",
-          success: true,
-        });
-      } else {
+      if (!jwtToken) {
         return res.status(400).send({
-          message: "User cant be logged out",
+          message: "Token expired",
           success: false,
         });
       }
-      res.status(200).send("ok");
+
+      const token = await Jwt.findOne({ uuid: jwtToken.data.uuid });
+
+      token.isBlackListed = true;
+      await token.save();
+      return res.status(200).send({
+        message: "User log out successfull",
+        success: true,
+      });
     } catch (error) {
       res.status(500).send({
         success: false,
@@ -172,6 +180,55 @@ export class AuthController {
       return res.status(200).send({
         message: "Logged out from all devices",
         success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+  };
+
+  static passwordChange = async (req, res) => {
+    try {
+      const {
+        currentPassword,
+        newPassword1,
+        newPassword2,
+        logoutFromAllDevice,
+      } = req.body;
+      // console.log("user-id==", req.user);
+      const currentUser = await User.findById(req.user.id);
+      const passwordMatch = await User.comparePassword(
+        currentPassword,
+        currentUser.password
+      );
+      console.log("passwordMatch===", passwordMatch);
+      if (!passwordMatch) {
+        return res.status(400).send({
+          success: false,
+          message: "Provided password do not match current password",
+        });
+      }
+
+      currentUser.password = newPassword1;
+      await currentUser.save();
+      //logout current authenticated user from all device
+      if (logoutFromAllDevice) {
+        await Jwt.updateMany(
+          {
+            user: req.user.id,
+          },
+          {
+            isBlackListed: true,
+          }
+        );
+      }
+
+      return res.status(200).send({
+        success: true,
+        message: "Password change successfull",
       });
     } catch (error) {
       console.log(error);

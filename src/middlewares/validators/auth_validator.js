@@ -43,7 +43,7 @@ export class AuthValidator {
 
   static logout = async (req, res, next) => {
     const schema = Joi.object({
-      uuid: Joi.string().required(),
+      refreshToken: Joi.string().required(),
     });
     await showValidationsError(req, res, next, schema);
   };
@@ -54,4 +54,28 @@ export class AuthValidator {
     });
     await showValidationsError(req, res, next, schema);
   };
+
+  static async passwordChange(req, res, next) {
+    const schema = Joi.object({
+      currentPassword: Joi.string().required(),
+      logoutFromAllDevice: Joi.boolean().required(),
+      newPassword1: Joi.string()
+        .pattern(new RegExp(AuthValidator.pswdPtrn))
+        .required()
+        .messages({
+          "string.pattern.base":
+            "Password must contain atleast one digit one special character and one upper case letter",
+        }),
+
+      newPassword2: Joi.any()
+        .valid(Joi.ref("newPassword1"))
+        .required()
+        .messages({
+          "any.only": "password and repeat password do not match",
+          "any.required": "{{#label}} is required",
+        }),
+    });
+
+    await showValidationsError(req, res, next, schema);
+  }
 }

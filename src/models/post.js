@@ -18,6 +18,14 @@ const postSchema = new Schema(
       required: false,
       trim: true,
     },
+    commentCount: {
+      type: Number,
+      default: 0,
+    },
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
     image: {
       type: String,
       required: false,

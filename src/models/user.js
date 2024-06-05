@@ -36,7 +36,10 @@ const userSchema = new Schema(
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+  }
 );
 
 userSchema.statics.comparePassword = async function (plaintext, hashedText) {
@@ -114,6 +117,13 @@ userSchema.post("save", async function (doc, next) {
   } catch (error) {
     next(error);
   }
+});
+
+userSchema.virtual("profile", {
+  ref: "Profile",
+  localField: "_id",
+  foreignField: "user",
+  justOne: true,
 });
 
 const User = mongoose.model("User", userSchema);

@@ -133,4 +133,31 @@ export class UserController {
       });
     }
   };
+
+  static getUserById = async (req, res) => {
+    const { userId } = req.params;
+    try {
+      console.log("get user by id");
+      const user = await User.findById(userId, { password: 0 }).populate(
+        "profile",
+        "avatar bio hobbies"
+      );
+      if (!user) {
+        return res.status(404).send({
+          success: false,
+          message: "User not found",
+        });
+      }
+      return res.status(200).send({
+        success: true,
+        message: "User found",
+        data: user,
+      });
+    } catch (error) {
+      res.status(500).send({
+        message: "something went wrong",
+        success: false,
+      });
+    }
+  };
 }

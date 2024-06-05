@@ -14,6 +14,9 @@ export class CommentController {
         });
       }
 
+      post.commentCount += 1;
+      await post.save();
+
       await Comment.create({
         user: req.user.id,
         post: post.id,
@@ -62,6 +65,9 @@ export class CommentController {
         user: req.user.id,
       });
       if (deletedComment) {
+        const post = await Post.findById(deletedComment.post);
+        post.commentCount -= 1;
+        await post.save();
         return res.status(200).send({
           message: "Comment Deleted Successfully",
           success: true,

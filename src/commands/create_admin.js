@@ -1,24 +1,5 @@
 import yargs from "yargs";
 
-console.log(yargs);
-console.log(yargs().argv);
-
-yargs()
-  .command(
-    "get",
-    "make a get HTTP request",
-    function (yargs) {
-      return yargs.option("u", {
-        alias: "url",
-        describe: "the URL to make an HTTP request to",
-      });
-    },
-    function (argv) {
-      console.log(argv.url);
-    }
-  )
-  .help().argv;
-
 // yargs.command({
 //   command: "create-admin",
 //   describe: "Create admin user",
