@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { verifyJwtToken, generateAccessToken } from "../utils/jwt_token.js";
 import { v4 as uuidv4 } from "uuid";
+import { sendMail } from "../utils/send_mail.js";
+import { generateToken } from "../utils/jwt_token.js";
+import { verificationEmailLifeTime } from "../constants.js";
+import { EmailToken } from "../models/userEmailToken.js";
 
 export class AuthController {
   static register = async (req, res) => {
@@ -25,12 +29,21 @@ export class AuthController {
         errors.email = "User with email address already exists";
         return res.status(400).send({ errors });
       }
-      await User.create(req.body);
+      const user = await User.create(req.body);
+      const emailToken = await generateToken(user, verificationEmailLifeTime);
+      await sendMail({
+        user,
+        subject: "User Verification Email",
+        token: emailToken,
+      });
+      console.log("user===", user);
+
       return res.status(201).send({
         message: "User registration successfull",
         success: true,
       });
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         errors: {
           message: "Something went wrong",
@@ -44,6 +57,19 @@ export class AuthController {
     const { email, password } = req.body;
     try {
       const user = await User.findOne({ email: email });
+      if (!user.isEmailVerified) {
+        const emailToken = await generateToken(user, verificationEmailLifeTime);
+        await sendMail({
+          user,
+          subject: "User Verification Email",
+          token: emailToken,
+        });
+        return res.status(400).send({
+          message:
+            "E-mail not verified. We have sent you verification email. Please verify your email address.",
+          success: false,
+        });
+      }
       if (!user) {
         return res.status(400).send({
           message: "The provided credential do not match our record",
@@ -64,9 +90,6 @@ export class AuthController {
         user: user._id,
         uuid: tokens.uuid,
       });
-
-      console.log(tokens);
-      // delete tokens.uuid;
 
       res.status(200).send({
         ...tokens,
@@ -230,6 +253,120 @@ export class AuthController {
         success: true,
         message: "Password change successfull",
       });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+  };
+
+  static verifyEmail = async (req, res) => {
+    try {
+      const token = await verifyJwtToken(req.body.token);
+      if (token) {
+        console.log(token);
+        const user = await User.findById(token.data.id);
+        user.isEmailVerified = true;
+        await user.save();
+
+        return res.redirect("/");
+
+        // status(200).send({
+        //   message: "Email verification successfull",
+        //   success: true,
+        // });
+      }
+      return res.status(400).send({
+        message: "Invalid token",
+        success: false,
+      });
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+  };
+
+  static passwordReset = async (req, res) => {
+    try {
+      const user = await User.findOne({ email: req.body.email });
+      if (!user) {
+        return res.status(200).send({
+          message: "Password reset email send",
+          success: true,
+        });
+      }
+      const emailToken = await generateToken(user, verificationEmailLifeTime);
+      console.log(emailToken);
+      await EmailToken.create({
+        user: user.id,
+        token: emailToken,
+      });
+
+      await sendMail({
+        user,
+        subject: "Password Reset Email",
+        token: emailToken,
+      });
+      return res.status(200).send({
+        message: "Password reset email sent",
+        success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+  };
+
+  static passwordResetConfirm = async (req, res) => {
+    const { token } = req.params;
+    const { newPassword1, newPassword2 } = req.body;
+    try {
+      const userSubmittedToken = await verifyJwtToken(token);
+      if (!userSubmittedToken) {
+        return res.status(400).send({
+          success: false,
+          message: "Token expired.",
+        });
+      }
+
+      const emailToken = await EmailToken.findOne({
+        user: userSubmittedToken.data.id,
+        token: token,
+      });
+
+      console.log("email-token==", emailToken);
+      if (!emailToken) {
+        return res.status(400).send({
+          success: false,
+          message:
+            "Email token has been already used or user with userId does not exists",
+        });
+      }
+
+      const user = await User.findById(userSubmittedToken.data.id);
+      if (!user) {
+        return res.status(404).send({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      user.password = newPassword1;
+      await user.save();
+      const deletedToken = await EmailToken.deleteOne({ _id: emailToken._id });
+      console.log("deleted-token", deletedToken);
+      return res.redirect("/");
+      // return res.status(200).send({
+      //   success:true,
+      //   message:"Password reset successfull"
+      // })
     } catch (error) {
       console.log(error);
       res.status(500).send({

@@ -2,8 +2,9 @@ import express from "express";
 import passport from "passport";
 import { CommentController } from "../controllers/comment.js";
 import { CommentValidator } from "../middlewares/validators/comment.js";
+import { authMiddleware } from "../middlewares/auth.js";
 const router = express.Router();
-router.use(passport.authenticate("jwt", { session: false }));
+router.use(authMiddleware);
 
 router.post("/:postId", [
   CommentValidator.createComment,

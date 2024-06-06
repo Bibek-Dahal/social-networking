@@ -24,6 +24,10 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     role: {
       type: "String",
       enum: [userRoles.Admin, userRoles.User],

@@ -12,10 +12,9 @@ import adminUser from "./src/routes/admin/user.js";
 import "./src/passport/stratigies/jwt_strategy.js";
 import { seedUsers } from "./src/seeders/user.js";
 import { seedPost } from "./src/seeders/post.js";
-
+export const baseDir = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 8000;
-
 //middlewares
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

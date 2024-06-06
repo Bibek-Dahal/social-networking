@@ -41,3 +41,27 @@ export const generateAccessToken = (user) => {
 
   return promise;
 };
+
+export const generateToken = (user, tokenLifetime) => {
+  const promise = new Promise((resolve, reject) => {
+    try {
+      const accessToken = jwt.sign(
+        {
+          exp: Math.floor(Date.now() / 1000) + tokenLifetime,
+          data: {
+            id: user.id,
+            userName: user.userName,
+            email: user.email,
+          },
+        },
+        process.env.JWT_SECRET
+      );
+
+      resolve(accessToken);
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+  return promise;
+};
