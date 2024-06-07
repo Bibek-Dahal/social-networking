@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { accessTokenLifeTime, refreshTokenLifeTime } from "../constants.js";
 import { Profile } from "./profile.js";
 import { userRoles } from "../constants.js";
+import { Post } from "./post.js";
 
 const { Schema } = mongoose;
 
@@ -116,6 +117,8 @@ userSchema.post("save", async function (doc, next) {
     } else {
       Profile.create({
         user: user._id,
+        phoneNumber: null,
+        avatar: null,
       });
     }
   } catch (error) {
@@ -130,5 +133,11 @@ userSchema.virtual("profile", {
   justOne: true,
 });
 
+userSchema.virtual("postCount", {
+  ref: "Post",
+  localField: "_id",
+  foreignField: "user",
+  count: true,
+});
 const User = mongoose.model("User", userSchema);
 export { User };

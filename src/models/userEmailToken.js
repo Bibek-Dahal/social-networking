@@ -9,8 +9,8 @@ const emailTokenSchema = new Schema({
     required: true,
   },
 
-  token: {
-    type: String,
+  uuid: {
+    type: Schema.Types.UUID,
     required: true,
   },
 

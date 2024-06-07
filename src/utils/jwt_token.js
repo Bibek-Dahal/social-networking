@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { accessTokenLifeTime } from "../constants.js";
+import { v4 as uuidv4 } from "uuid";
 export const verifyJwtToken = function (token) {
   const promise = new Promise((resolve, reject) => {
     try {
@@ -45,19 +46,21 @@ export const generateAccessToken = (user) => {
 export const generateToken = (user, tokenLifetime) => {
   const promise = new Promise((resolve, reject) => {
     try {
-      const accessToken = jwt.sign(
+      const uuid = uuidv4();
+      const passwordResetToken = jwt.sign(
         {
           exp: Math.floor(Date.now() / 1000) + tokenLifetime,
           data: {
             id: user.id,
             userName: user.userName,
             email: user.email,
+            uuid: uuid,
           },
         },
         process.env.JWT_SECRET
       );
 
-      resolve(accessToken);
+      resolve({ passwordResetToken, uuid });
     } catch (error) {
       reject(error);
     }

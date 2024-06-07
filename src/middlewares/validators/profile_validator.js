@@ -7,6 +7,8 @@ export class ProfileValidator {
       bio: Joi.string().trim().max(200),
       avatar: Joi.string(),
       hobbies: Joi.array().items(Joi.string()),
+      phoneNumber: Joi.string().min(10).max(10),
+      showPhoneNumber: Joi.boolean(),
     });
 
     await showValidationsError(req, res, next, schema);

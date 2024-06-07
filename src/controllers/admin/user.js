@@ -1,9 +1,9 @@
 import { User } from "../../models/user.js";
+import { Post } from "../../models/post.js";
 export class AdminUserController {
   static listAllUser = async (req, res) => {
-    console.log("list user admin called");
     try {
-      const users = await User.find({}, { password: 0 });
+      const users = await User.find({}, { password: 0 }).populate("postCount");
       res.status(200).send({
         success: true,
         data: users,
@@ -19,13 +19,14 @@ export class AdminUserController {
   static getUserByid = async (req, res) => {
     const { userId } = req.params;
     try {
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).populate("postCount");
       if (!user) {
         return res.status(404).send({
           success: false,
           message: "User not found",
         });
       }
+      console.log("postCount==", await user.postCount);
       return res.status(200).send({
         message: "User fetched successfully",
         data: user,

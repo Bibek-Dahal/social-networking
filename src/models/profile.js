@@ -10,7 +10,14 @@ const profileSchema = new Schema(
     },
     avatar: {
       type: String,
-      defaul: null,
+    },
+    phoneNumber: {
+      type: Number,
+      required: false,
+    },
+    showPhoneNumber: {
+      type: Boolean,
+      default: false,
     },
     bio: {
       type: String,

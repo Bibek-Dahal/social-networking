@@ -60,12 +60,15 @@ export class CommentController {
   static deleteComment = async (req, res) => {
     const { commentId } = req.params;
     try {
-      const deletedComment = await Comment.findOneAndDelete({
-        _id: commentId,
-        user: req.user.id,
-      });
-      if (deletedComment) {
-        const post = await Post.findById(deletedComment.post);
+      const comment = await Comment.findById(commentId);
+
+      if (comment) {
+        const post = await Post.findById(comment.post);
+
+        if (comment.user == req.user.id || post.user == req.user.id) {
+          Comment.deleteOne({ _id: commentId });
+        }
+
         post.commentCount -= 1;
         await post.save();
         return res.status(200).send({

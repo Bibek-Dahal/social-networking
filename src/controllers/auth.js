@@ -31,7 +31,7 @@ export class AuthController {
       }
       const user = await User.create(req.body);
       const emailToken = await generateToken(user, verificationEmailLifeTime);
-      await sendMail({
+      sendMail({
         user,
         subject: "User Verification Email",
         token: emailToken,
@@ -59,7 +59,7 @@ export class AuthController {
       const user = await User.findOne({ email: email });
       if (!user.isEmailVerified) {
         const emailToken = await generateToken(user, verificationEmailLifeTime);
-        await sendMail({
+        sendMail({
           user,
           subject: "User Verification Email",
           token: emailToken,
@@ -299,17 +299,20 @@ export class AuthController {
           success: true,
         });
       }
-      const emailToken = await generateToken(user, verificationEmailLifeTime);
-      console.log(emailToken);
+      const { passwordResetToken, uuid } = await generateToken(
+        user,
+        verificationEmailLifeTime
+      );
+      console.log(passwordResetToken);
       await EmailToken.create({
         user: user.id,
-        token: emailToken,
+        uuid: uuid,
       });
 
       await sendMail({
         user,
         subject: "Password Reset Email",
-        token: emailToken,
+        token: passwordResetToken,
       });
       return res.status(200).send({
         message: "Password reset email sent",
@@ -338,7 +341,7 @@ export class AuthController {
 
       const emailToken = await EmailToken.findOne({
         user: userSubmittedToken.data.id,
-        token: token,
+        uuid: userSubmittedToken.data.uuid,
       });
 
       console.log("email-token==", emailToken);

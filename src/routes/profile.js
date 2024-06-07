@@ -15,5 +15,6 @@ router.patch("/", [
 ]);
 
 router.get("/", [ProfileController.getProfile]);
+router.get("/:profileId", [ProfileController.getProfileById]);
 
 export default router;
