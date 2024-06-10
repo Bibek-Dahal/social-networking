@@ -1,9 +1,16 @@
 import { User } from "../../models/user.js";
 import { Post } from "../../models/post.js";
+import { paginate } from "../../utils/pagination.js";
 export class AdminUserController {
   static listAllUser = async (req, res) => {
     try {
-      const users = await User.find({}, { password: 0 }).populate("postCount");
+      const filterFields = ["userName", "email", "isVerified"];
+      const filterQuery = { userName: "bibek" };
+      const query = User.find(filterQuery, { password: 0 }).populate(
+        "postCount"
+      );
+      const users = await paginate({ req, model: User, filterQuery, query });
+      // await User.find({}, { password: 0 }).populate("postCount");
       res.status(200).send({
         success: true,
         data: users,

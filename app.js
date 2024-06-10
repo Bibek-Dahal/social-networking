@@ -11,6 +11,7 @@ import like from "./src/routes/like.js";
 import adminUser from "./src/routes/admin/user.js";
 import adminPost from "./src/routes/admin/post.js";
 import "./src/passport/stratigies/jwt_strategy.js";
+import "./src/passport/stratigies/google_strategy.js";
 import { seedUsers } from "./src/seeders/user.js";
 import { seedPost } from "./src/seeders/post.js";
 export const baseDir = process.cwd();
@@ -37,6 +38,7 @@ app.get("/", async (req, res) => {
 
 connectDb().then(() => {
   // seedPost();
+  // seedUsers();
 });
 
 app.listen(PORT, () => {

@@ -4,7 +4,7 @@ import { connectDb } from "../config/connect_db.js";
 const users = [];
 
 const fillUsers = () => {
-  for (let i = 0; i < 300; i++) {
+  for (let i = 0; i < 20; i++) {
     const userName = faker.person.firstName();
     const email = userName.split(".")[0] + "@gmail.com";
     const password = "Admin@123";
