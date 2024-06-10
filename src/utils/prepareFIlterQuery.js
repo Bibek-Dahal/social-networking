@@ -1,1 +1,0 @@
-const prepareFilterQuery = (initialFilterQuery, filterFields) => {};

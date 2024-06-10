@@ -1,5 +1,6 @@
 export const paginate = async ({ req, model, filterQuery, query }) => {
   const maxLimit = 500;
+  let sort = req.query.sort || "createdAt";
   let limit = req.query.limit || 10;
   let page = req.query.page || 1;
   let skip;
@@ -11,7 +12,12 @@ export const paginate = async ({ req, model, filterQuery, query }) => {
   const documentCount = await model.countDocuments(filterQuery);
   console.log(documentCount);
 
-  const result = await query.skip(skip).limit(limit).exec();
+  let data = await query.skip(skip).limit(limit).sort(sort).exec();
+  if (sort == "postCount") {
+    result.sort((a, b) => b.postCount - a.postCount);
+  } else if (sort == "-postCount") {
+    result.sort((a, b) => a.postCount - b.postCount);
+  }
 
-  return result;
+  return { data, count: documentCount };
 };

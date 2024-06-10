@@ -1,22 +1,34 @@
 import { User } from "../../models/user.js";
 import { Post } from "../../models/post.js";
 import { paginate } from "../../utils/pagination.js";
+import { prepareSearchQuery } from "../../utils/prepareSearchQuery.js";
 export class AdminUserController {
   static listAllUser = async (req, res) => {
     try {
-      const filterFields = ["userName", "email", "isVerified"];
-      const filterQuery = { userName: "bibek" };
+      const searchFields = ["userName", "email"];
+      let filterQuery = {};
+      let sq = prepareSearchQuery(req, searchFields);
+      if (sq) {
+        filterQuery = { ...filterQuery, ...sq };
+      }
       const query = User.find(filterQuery, { password: 0 }).populate(
         "postCount"
       );
-      const users = await paginate({ req, model: User, filterQuery, query });
+      const { data, count } = await paginate({
+        req,
+        model: User,
+        filterQuery,
+        query,
+      });
       // await User.find({}, { password: 0 }).populate("postCount");
       res.status(200).send({
         success: true,
-        data: users,
+        count: count,
+        data: data,
         message: "User fetched successfully",
       });
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         message: "Something went wrong",
         success: false,
