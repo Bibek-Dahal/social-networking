@@ -34,6 +34,10 @@ const userSchema = new Schema(
       enum: [userRoles.Admin, userRoles.User],
       default: userRoles.User,
     },
+    blockUser: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: true,

@@ -22,6 +22,14 @@ export const authMiddleware = (req, res, next) => {
         success: false,
       });
     }
+    // console.log("blockUser===", user.blockUser);
+    if (user.blockUser) {
+      return res.status(400).send({
+        message:
+          "We are sorry to notify you that you are restricted to access this site. Please contact support for further information.",
+        success: false,
+      });
+    }
     req.user = user;
     next();
   })(req, res, next);

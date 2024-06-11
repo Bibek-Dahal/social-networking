@@ -1,5 +1,5 @@
+import { Jwt } from "../../models/jwtTokens.js";
 import { User } from "../../models/user.js";
-import { Post } from "../../models/post.js";
 import { paginate } from "../../utils/pagination.js";
 import { prepareSearchQuery } from "../../utils/prepareSearchQuery.js";
 export class AdminUserController {
@@ -20,6 +20,11 @@ export class AdminUserController {
         filterQuery,
         query,
       });
+      if (req.query.sort == "postCount") {
+        data.sort((a, b) => b.postCount - a.postCount);
+      } else if (req.query.sort == "-postCount") {
+        data.sort((a, b) => a.postCount - b.postCount);
+      }
       // await User.find({}, { password: 0 }).populate("postCount");
       res.status(200).send({
         success: true,
@@ -130,6 +135,9 @@ export class AdminUserController {
       }
 
       await userToBeUpdated.updateOne(req.body);
+      if (req.body.blockUser === true) {
+        await Jwt.updateMany({ user: req.user.id }, { isBlackListed: true });
+      }
       res.status(200).send({
         success: true,
         message: "User updated successfully",

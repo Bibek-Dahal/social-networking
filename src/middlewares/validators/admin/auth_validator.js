@@ -39,6 +39,7 @@ export class AdminUserValidator {
       userName: Joi.string().trim().alphanum().min(3).max(50).required(),
       email: Joi.string().trim().email().required(),
       role: Joi.any().valid(userRoles.User, userRoles.Admin).required(),
+      blockUser: Joi.boolean().required(),
       followers: Joi.array().required(),
       following: Joi.array().required(),
     });

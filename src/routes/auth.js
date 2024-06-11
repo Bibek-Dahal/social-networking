@@ -2,6 +2,7 @@ import express from "express";
 import { AuthController } from "../controllers/auth.js";
 import { AuthValidator } from "../middlewares/validators/auth_validator.js";
 import { authMiddleware } from "../middlewares/auth.js";
+import { userBlockMiddleware } from "../middlewares/userBlockMiddleware.js";
 import passport from "passport";
 
 const router = express.Router();

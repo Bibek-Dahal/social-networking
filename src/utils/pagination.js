@@ -13,11 +13,6 @@ export const paginate = async ({ req, model, filterQuery, query }) => {
   console.log(documentCount);
 
   let data = await query.skip(skip).limit(limit).sort(sort).exec();
-  if (sort == "postCount") {
-    result.sort((a, b) => b.postCount - a.postCount);
-  } else if (sort == "-postCount") {
-    result.sort((a, b) => a.postCount - b.postCount);
-  }
 
   return { data, count: documentCount };
 };

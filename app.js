@@ -10,10 +10,12 @@ import home from "./src/routes/home.js";
 import like from "./src/routes/like.js";
 import adminUser from "./src/routes/admin/user.js";
 import adminPost from "./src/routes/admin/post.js";
+import subscription from "./src/routes/admin/subscription.js";
 import "./src/passport/stratigies/jwt_strategy.js";
 import "./src/passport/stratigies/google_strategy.js";
 import { seedUsers } from "./src/seeders/user.js";
 import { seedPost } from "./src/seeders/post.js";
+import { generateSecretKey } from "./src/utils/generateSecretKey.js";
 export const baseDir = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -31,6 +33,7 @@ app.use("/api/like", like);
 
 app.use("/api/admin/users", adminUser);
 app.use("/api/admin/posts", adminPost);
+app.use("/api/admin/subscriptions", subscription);
 
 app.get("/", async (req, res) => {
   res.send("Hello World");
@@ -44,3 +47,15 @@ connectDb().then(() => {
 app.listen(PORT, () => {
   console.log(`App listening on PORT:${PORT}`);
 });
+
+import moment from "moment";
+const epoch = moment().valueOf();
+const datetime = moment.utc();
+console.log("current-datetime", datetime);
+
+// console.log(moment().add({ days: 7, months: 1, years: 1 }).utc());
+console.log(moment().valueOf());
+console.log();
+console.log();
+console.log();
+console.log(moment().valueOf() - epoch);

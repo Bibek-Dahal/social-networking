@@ -1,5 +1,9 @@
 import { FollowRequest } from "../models/followRequest.js";
+import { Subscription } from "../models/subscription.js";
 import { User } from "../models/user.js";
+import { subscriptionRate } from "../constants.js";
+import { createSubscriptionTime } from "../utils/createSubscriptionTime.js";
+import { serverError } from "../constants.js";
 export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
@@ -406,5 +410,107 @@ export class UserController {
         success: false,
       });
     }
+  };
+
+  static subscribeUnsubscribeUser = async (req, res) => {
+    const { userId } = req.params;
+    const { renewalPeriod } = req.body;
+    try {
+      const userToSubscribe = await User.findById(userId);
+      if (!userToSubscribe) {
+        return res.status(404).send({
+          message: "User not found",
+          success: false,
+        });
+      }
+
+      const subscriptionObj = await Subscription.findOne({
+        subscribeFrom: req.user.id,
+        subscribeTo: userId,
+      });
+
+      if (subscriptionObj) {
+        await Subscription.deleteOne({ _id: subscriptionObj.id });
+        return res.status(404).send({
+          message: "Subscription removed successfully.",
+          success: false,
+        });
+      }
+      if (userToSubscribe.id == req.user.id) {
+        return res.status(400).send({
+          message: "Cant subscribe to own id",
+          success: false,
+        });
+      }
+
+      const subscriptionTime = createSubscriptionTime(renewalPeriod);
+      console.log("subsTime===", subscriptionTime);
+      const subscription = await Subscription.create({
+        subscribeFrom: req.user.id,
+        subscribeTo: userId,
+        subscriptionRate: subscriptionRate,
+        renewalPeriod: renewalPeriod,
+        expiryTime: subscriptionTime,
+      });
+      return res.status(201).send({
+        success: true,
+        message: "Subscription added successfully",
+        data: subscription,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(serverError);
+    }
+
+    // try {
+    //   console.log(req.user);
+    //   const userToFollow = await User.findById(userId);
+
+    //   if (userToFollow) {
+    //     //get followers of user to be followed
+    //     const followersOfUserToFollow = userToFollow.followers.map((item) =>
+    //       item.toString()
+    //     );
+
+    //     if (followersOfUserToFollow.includes(req.user.id)) {
+    //       //if followers already includes current user id do not add follower
+    //       return res.status(400).send({
+    //         message: "Already in list of follower of following user",
+    //         success: false,
+    //       });
+    //     } else {
+    //       userToFollow.followers.push(req.user._id);
+    //       userToFollow.save();
+    //     }
+
+    //     const userCurrentFollowings = req.user.following.map((item) =>
+    //       item.toString()
+    //     );
+    //     console.log(userCurrentFollowings);
+
+    //     if (userCurrentFollowings.includes(userId)) {
+    //       return res.status(400).send({
+    //         message: "Already following user",
+    //         success: false,
+    //       });
+    //     } else {
+    //       userCurrentFollowings.push(userToFollow._id);
+    //       const userToBeUpdated = req.user;
+
+    //       userToBeUpdated.following = userCurrentFollowings;
+    //       userToBeUpdated.save();
+    //       return res.status(200).send({
+    //         message: "follower added successfully",
+    //         success: true,
+    //       });
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    //   res.status(500).send({
+    //     message: "something went wrong",
+    //     success: false,
+    //   });
+    // }
   };
 }

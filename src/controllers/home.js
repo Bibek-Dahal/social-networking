@@ -1,10 +1,23 @@
 import { Post } from "../models/post.js";
+import { Subscription } from "../models/subscription.js";
 export class HomeController {
   static homeFeed = async (req, res) => {
     try {
       const userFollowings = req.user.following;
       console.log(userFollowings);
-      const posts = await Post.find({ user: { $in: userFollowings } })
+
+      //finds whom current user have subscribed to
+      const subscribedUsers = await Subscription.find({
+        subscribeFrom: req.user.id,
+      });
+
+      //filters if subscribed user is in following list of user
+      const userFollowingFilter = subscribedUsers.filter((item) => {
+        return !item.isExpired && userFollowings.includes(item.subscribeTo);
+      });
+      console.log("userFollowingFilter==", userFollowingFilter);
+      // console.log("subscribed user====", subscribedUsers);
+      const posts = await Post.find({ user: { $in: userFollowingFilter } })
         .populate(
           {
             path: "user",
@@ -26,6 +39,7 @@ export class HomeController {
         message: "Post fetched successfully",
       });
     } catch (error) {
+      console.log(error);
       return res.status(500).send({
         message: "Something went wrong",
         success: false,
