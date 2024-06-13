@@ -25,6 +25,10 @@ router.post("/subscribe-unsubscribe/:userId", [
   SubscriptionValidator.createSubscription,
   UserController.subscribeUnsubscribeUser,
 ]);
+router.post("/up-down-subscription/:subsId", [
+  SubscriptionValidator.upgradeOrDowngradeSubscription,
+  UserController.upgradeOrDowngradeSubscription,
+]);
 
 router.get("/:userId", [UserController.getUserById]);
 

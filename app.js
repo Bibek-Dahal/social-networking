@@ -47,15 +47,3 @@ connectDb().then(() => {
 app.listen(PORT, () => {
   console.log(`App listening on PORT:${PORT}`);
 });
-
-import moment from "moment";
-const epoch = moment().valueOf();
-const datetime = moment.utc();
-console.log("current-datetime", datetime);
-
-// console.log(moment().add({ days: 7, months: 1, years: 1 }).utc());
-console.log(moment().valueOf());
-console.log();
-console.log();
-console.log();
-console.log(moment().valueOf() - epoch);

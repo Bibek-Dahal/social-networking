@@ -16,10 +16,11 @@ export const createSubscriptionTime = (period) => {
       newDateTime = moment().add({ months: 3 }).utc();
       break;
     case SubscriptionPeriod.SemiAnnually:
-      newDateTime = moment().add({ months: 6 }).utc();
+      newDateTime = moment().add(6, "months").utc();
       break;
     case SubscriptionPeriod.Annually:
-      newDateTime = moment().add({ years: 1 }).utc();
+      console.log("inside annually");
+      newDateTime = moment().add({ year: 1 }).utc();
       break;
     default:
       throw new Error("Provided value doesnot match case");

@@ -3,7 +3,9 @@ import { Subscription } from "../models/subscription.js";
 import { User } from "../models/user.js";
 import { subscriptionRate } from "../constants.js";
 import { createSubscriptionTime } from "../utils/createSubscriptionTime.js";
+import moment from "moment";
 import { serverError } from "../constants.js";
+import { determineUpOrDownSubs } from "../utils/determineUpgradeOrDowngrade.js";
 export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
@@ -512,5 +514,81 @@ export class UserController {
     //     success: false,
     //   });
     // }
+  };
+
+  static upgradeOrDowngradeSubscription = async (req, res) => {
+    const { subsId } = req.params;
+    const { renewalPeriod } = req.body;
+
+    try {
+      const subscription = await Subscription.findOne({
+        _id: subsId,
+        subscribeFrom: req.user.id,
+      });
+
+      if (!subscription) {
+        return res.status(404).send({
+          succe: false,
+          message: "Subscription not found",
+        });
+      }
+      const upgradeOrDownStatus = determineUpOrDownSubs(
+        subscription.renewalPeriod,
+        renewalPeriod
+      );
+
+      if (upgradeOrDownStatus === "Upgrade") {
+        if (subscription.isExpired) {
+          //no need to perform date manipulation
+          const newsubscriptionTime = createSubscriptionTime(renewalPeriod);
+          subscription.expiryTime = newsubscriptionTime;
+          subscription.renewalPeriod = renewalPeriod;
+          await subscription.save();
+          return res.status(200).send({
+            success: true,
+            message: "Subscription added successfully",
+          });
+        } else {
+          const newsubscriptionTime = createSubscriptionTime(renewalPeriod);
+          const expiryTime = moment(subscription.expiryTime).utc();
+          console.log("expiry-time===", expiryTime);
+
+          const currentDate = moment().utc();
+
+          const daysDiff = expiryTime.diff(currentDate, "days");
+
+          console.log("new Expiry Date before==", newsubscriptionTime);
+
+          const newExpiryDate = newsubscriptionTime
+            .add({
+              days: daysDiff,
+            })
+            .utc();
+          console.log("new Expiry Date after days add==", newsubscriptionTime);
+          // console.log("new subscription time==", newExpiryDate);
+
+          subscription.expiryTime = newExpiryDate;
+          subscription.renewalPeriod = renewalPeriod;
+          await subscription.save();
+          res.status(200).send({
+            success: true,
+            message: "Subscription upgraded successfully",
+          });
+        }
+      } else {
+        //downgrade user renewal period
+        const newsubscriptionTime = createSubscriptionTime(renewalPeriod);
+        subscription.expiryTime = newsubscriptionTime;
+        subscription.renewalPeriod = renewalPeriod;
+        await subscription.save();
+        res.status(200).send({
+          success: true,
+          message: "Subscription downgraded successfully",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(serverError);
+    }
   };
 }
