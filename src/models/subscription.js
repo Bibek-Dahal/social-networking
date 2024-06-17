@@ -17,9 +17,9 @@ const subscriptionSchema = new Schema(
       ref: "User",
       required: true,
     },
-    isRenewed: {
+    isActive: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     subscriptionRate: {
       type: Number,

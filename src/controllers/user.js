@@ -537,6 +537,8 @@ export class UserController {
         renewalPeriod
       );
 
+      console.log("UpgradeDownValue==", upgradeOrDownStatus);
+
       if (upgradeOrDownStatus === "Upgrade") {
         if (subscription.isExpired) {
           //no need to perform date manipulation

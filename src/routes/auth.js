@@ -3,6 +3,7 @@ import { AuthController } from "../controllers/auth.js";
 import { AuthValidator } from "../middlewares/validators/auth_validator.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import { userBlockMiddleware } from "../middlewares/userBlockMiddleware.js";
+import { verifyOTP } from "../middlewares/verifyOtp.js";
 import passport from "passport";
 
 const router = express.Router();
@@ -78,5 +79,6 @@ router.post("/logout-from-all-devices", [
 
 router.post("/token/refresh", [AuthController.generateNewAccessToken]);
 router.post("/verify-email", AuthController.verifyEmail);
+router.post("/verify-otp", verifyOTP);
 
 export default router;
