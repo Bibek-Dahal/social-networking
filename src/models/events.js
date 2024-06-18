@@ -34,6 +34,7 @@ const eventSchema = new Schema(
     status: {
       type: String,
       enum: [EventStatus.Active, EventStatus.Ongoing, EventStatus.Ended],
+      default: EventStatus.Active,
     },
     location: {
       type: String,

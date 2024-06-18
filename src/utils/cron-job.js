@@ -17,7 +17,7 @@ export const scheduleCron = (time) => {
   //'*/10 * * * * *' every 10 seconds
   cron.schedule('*/10 * * * * *', async () => {
     try {
-      console.log('running every minute');
+      console.log('running every 10 seconds');
       const data = await updateUserActiveStatus();
       console.log('userData==', data);
     } catch (error) {

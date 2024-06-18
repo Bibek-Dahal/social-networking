@@ -11,6 +11,7 @@ import like from './src/routes/like.js';
 import adminUser from './src/routes/admin/user.js';
 import adminPost from './src/routes/admin/post.js';
 import subscription from './src/routes/admin/subscription.js';
+import event from './src/routes/event.js';
 import './src/passport/stratigies/jwt_strategy.js';
 import './src/passport/stratigies/google_strategy.js';
 import { seedUsers } from './src/seeders/user.js';
@@ -32,6 +33,7 @@ app.use('/api/post', post);
 app.use('/api/comment', comment);
 app.use('/api/home', home);
 app.use('/api/like', like);
+app.use('/api/event', event);
 
 app.use('/api/admin/users', adminUser);
 app.use('/api/admin/posts', adminPost);
@@ -56,9 +58,23 @@ import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 // console.log(generateSecretKey());
 // generateQRCodeURL()
 //   .then((dataURL) => {
-//     console.log("Scan the QR code with the Google Authenticator app:");
+//     console.log('Scan the QR code with the Google Authenticator app:');
 //     console.log(dataURL);
 //   })
 //   .catch((err) => {
-//     console.error("Error generating QR code:", err);
+//     console.error('Error generating QR code:', err);
 //   });
+
+// function getTimezoneName() {
+//   const options = { timeZoneName: 'long' };
+//   const timezone = Intl.DateTimeFormat(undefined, options).resolvedOptions()
+//     .timeZone;
+//   return timezone;
+// }
+
+// // Example usage:
+// const timezoneName = getTimezoneName();
+// console.log(timezoneName);
+
+import moment from 'moment';
+console.log(moment().local());
