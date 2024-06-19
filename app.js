@@ -12,6 +12,7 @@ import adminUser from './src/routes/admin/user.js';
 import adminPost from './src/routes/admin/post.js';
 import subscription from './src/routes/admin/subscription.js';
 import event from './src/routes/event.js';
+import chat from './src/routes/chat.js';
 import './src/passport/stratigies/jwt_strategy.js';
 import './src/passport/stratigies/google_strategy.js';
 import { seedUsers } from './src/seeders/user.js';
@@ -34,6 +35,7 @@ app.use('/api/comment', comment);
 app.use('/api/home', home);
 app.use('/api/like', like);
 app.use('/api/event', event);
+app.use('/api/chat', chat);
 
 app.use('/api/admin/users', adminUser);
 app.use('/api/admin/posts', adminPost);

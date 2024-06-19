@@ -11,5 +11,6 @@ router.patch('/:eventId', [
   EventController.updateEvent,
 ]);
 router.get('/', EventController.listAllEvents);
+router.delete('/:eventId', EventController.deleteEvent);
 
 export default router;

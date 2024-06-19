@@ -105,4 +105,26 @@ export class EventController {
       res.status(500).send(serverError);
     }
   };
+
+  static deleteEvent = async (req, res) => {
+    try {
+      const { eventId } = req.params.id;
+      const deletedEvent = await Event.findOneAndDelete({
+        _id: eventId,
+        user: req.user.id,
+      });
+      if (!deletedEvent) {
+        return res.status(404).send({
+          message: 'Event not found',
+          success: false,
+        });
+      }
+      return res.status(200).send({
+        message: 'Event deleted successfully',
+        success: true,
+      });
+    } catch (error) {
+      res.status(500).send(serverError);
+    }
+  };
 }
