@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
-import "dotenv/config";
-import { accessTokenLifeTime } from "../constants.js";
-import { v4 as uuidv4 } from "uuid";
+import jwt from 'jsonwebtoken';
+import 'dotenv/config';
+import { accessTokenLifeTime } from '../constants.js';
+import { v4 as uuidv4 } from 'uuid';
 export const verifyJwtToken = function (token) {
   const promise = new Promise((resolve, reject) => {
     try {
@@ -47,7 +47,7 @@ export const generateToken = (user, tokenLifetime) => {
   const promise = new Promise((resolve, reject) => {
     try {
       const uuid = uuidv4();
-      const passwordResetToken = jwt.sign(
+      const token = jwt.sign(
         {
           exp: Math.floor(Date.now() / 1000) + tokenLifetime,
           data: {
@@ -60,7 +60,7 @@ export const generateToken = (user, tokenLifetime) => {
         process.env.JWT_SECRET
       );
 
-      resolve({ passwordResetToken, uuid });
+      resolve({ token, uuid });
     } catch (error) {
       reject(error);
     }

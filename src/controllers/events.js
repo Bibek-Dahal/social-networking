@@ -2,6 +2,7 @@ import { Event } from '../models/events.js';
 import { serverError } from '../constants.js';
 import moment from 'moment-timezone';
 import mt from 'moment';
+import { sendPriorNotification } from '../utils/cron-job.js';
 export class EventController {
   static createEvent = async (req, res) => {
     try {
@@ -18,6 +19,7 @@ export class EventController {
         });
       }
       const data = await Event.create(req.body);
+      sendPriorNotification(req.body.startDate);
 
       return res.status(201).send({
         message: 'Event created successfully',

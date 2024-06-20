@@ -65,7 +65,7 @@ export function generateQRCodeURL() {
       if (err) {
         reject(err);
       } else {
-        resolve(dataURL);
+        resolve({ QR: dataURL, secret });
       }
     });
   });

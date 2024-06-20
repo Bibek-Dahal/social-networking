@@ -79,4 +79,5 @@ import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 // console.log(timezoneName);
 
 import moment from 'moment';
-console.log(moment().local());
+console.log(moment().utc());
+console.log(moment.utc().local());

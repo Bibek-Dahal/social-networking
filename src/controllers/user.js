@@ -1,11 +1,13 @@
-import { FollowRequest } from "../models/followRequest.js";
-import { Subscription } from "../models/subscription.js";
-import { User } from "../models/user.js";
-import { subscriptionRate } from "../constants.js";
-import { createSubscriptionTime } from "../utils/createSubscriptionTime.js";
-import moment from "moment";
-import { serverError } from "../constants.js";
-import { determineUpOrDownSubs } from "../utils/determineUpgradeOrDowngrade.js";
+import { FollowRequest } from '../models/followRequest.js';
+import { Subscription } from '../models/subscription.js';
+import { User } from '../models/user.js';
+import { subscriptionRate } from '../constants.js';
+import { createSubscriptionTime } from '../utils/createSubscriptionTime.js';
+import moment from 'moment';
+import { serverError } from '../constants.js';
+import { determineUpOrDownSubs } from '../utils/determineUpgradeOrDowngrade.js';
+import { generateQRCodeURL } from '../utils/generateQrCode.js';
+import { verifyOTP } from '../utils/verifyOtp.js';
 export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
@@ -21,11 +23,11 @@ export class UserController {
       res.status(200).send({
         data: data,
         success: true,
-        message: "User info",
+        message: 'User info',
       });
     } catch (error) {
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -144,25 +146,25 @@ export class UserController {
   static getUserById = async (req, res) => {
     const { userId } = req.params;
     try {
-      console.log("get user by id");
+      console.log('get user by id');
       const user = await User.findById(userId, { password: 0 }).populate(
-        "profile",
-        "avatar bio hobbies"
+        'profile',
+        'avatar bio hobbies'
       );
       if (!user) {
         return res.status(404).send({
           success: false,
-          message: "User not found",
+          message: 'User not found',
         });
       }
       return res.status(200).send({
         success: true,
-        message: "User found",
+        message: 'User found',
         data: user,
       });
     } catch (error) {
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -174,7 +176,7 @@ export class UserController {
       if (userId === req.user.id) {
         return res.status(400).send({
           success: false,
-          message: "Cant follow to own id",
+          message: 'Cant follow to own id',
         });
       }
 
@@ -185,7 +187,7 @@ export class UserController {
       if (req.user.following.includes(userId)) {
         return res.status(400).send({
           success: false,
-          message: "Already following user",
+          message: 'Already following user',
         });
       }
       if (followreq) {
@@ -195,12 +197,12 @@ export class UserController {
         if (deletedItem) {
           return res.status(200).send({
             success: true,
-            message: "Follow request unsent",
+            message: 'Follow request unsent',
           });
         } else {
           return res.status(404).send({
             success: true,
-            message: "Follow request not found",
+            message: 'Follow request not found',
           });
         }
       } else {
@@ -210,28 +212,28 @@ export class UserController {
         });
         return res.status(200).send({
           success: true,
-          message: "Follow request sent",
+          message: 'Follow request sent',
         });
       }
     } catch (error) {
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
   };
 
   static listFollowRequest = async (req, res) => {
-    console.log("list follow called");
+    console.log('list follow called');
     try {
       const followRequests = await FollowRequest.find({
         receiver: req.user.id,
       })
-        .select("sender")
+        .select('sender')
         .populate({
-          path: "sender",
-          select: "userName email profile",
-          populate: { path: "profile", select: "bio avatar" },
+          path: 'sender',
+          select: 'userName email profile',
+          populate: { path: 'profile', select: 'bio avatar' },
         });
 
       res.status(200).send({
@@ -241,7 +243,7 @@ export class UserController {
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -257,7 +259,7 @@ export class UserController {
       if (!followReqObj) {
         return res.status(404).send({
           success: false,
-          message: "No follow request exists",
+          message: 'No follow request exists',
         });
       }
 
@@ -269,7 +271,7 @@ export class UserController {
       if (!this.followUnfollowRequest) {
         return res.status(404).send({
           success: false,
-          message: "User not found",
+          message: 'User not found',
         });
       }
       followRequstingUser.following.push(req.user.id);
@@ -277,11 +279,11 @@ export class UserController {
       await FollowRequest.deleteOne({ _id: followReqObj.id });
       return res.status(200).send({
         success: true,
-        message: "Follow request accepted",
+        message: 'Follow request accepted',
       });
     } catch (error) {
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -297,18 +299,18 @@ export class UserController {
       if (!followReqObj) {
         return res.status(404).send({
           success: false,
-          message: "No follow request exists",
+          message: 'No follow request exists',
         });
       }
 
       await FollowRequest.deleteOne({ _id: followReqObj.id });
       res.status(200).send({
         success: true,
-        message: "Follow request unsent",
+        message: 'Follow request unsent',
       });
     } catch (error) {
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -325,12 +327,12 @@ export class UserController {
       return res.status(200).send({
         success: true,
         data: users,
-        message: "User fetched successfully",
+        message: 'User fetched successfully',
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -343,13 +345,13 @@ export class UserController {
       if (!user) {
         return res.status(404).send({
           success: false,
-          message: "User not found",
+          message: 'User not found',
         });
       }
       if (!req.user.following.includes(userId)) {
         return res.status(400).send({
           success: false,
-          message: "Cant unfollow user. Not in following list",
+          message: 'Cant unfollow user. Not in following list',
         });
       }
 
@@ -357,12 +359,12 @@ export class UserController {
       await req.user.save();
       res.status(200).send({
         success: true,
-        message: "User unfollowed",
+        message: 'User unfollowed',
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -375,17 +377,17 @@ export class UserController {
           _id: { $in: req.user.following },
         },
         { password: 0 }
-      ).populate("profile");
+      ).populate('profile');
       console.log(users);
       res.status(200).send({
-        message: "Followings fetched successfully",
+        message: 'Followings fetched successfully',
         success: true,
         data: users,
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -398,17 +400,17 @@ export class UserController {
           _id: { $in: req.user.followers },
         },
         { password: 0 }
-      ).populate("profile");
+      ).populate('profile');
       console.log(users);
       res.status(200).send({
-        message: "Followers fetched successfully",
+        message: 'Followers fetched successfully',
         success: true,
         data: users,
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "something went wrong",
+        message: 'something went wrong',
         success: false,
       });
     }
@@ -421,7 +423,7 @@ export class UserController {
       const userToSubscribe = await User.findById(userId);
       if (!userToSubscribe) {
         return res.status(404).send({
-          message: "User not found",
+          message: 'User not found',
           success: false,
         });
       }
@@ -434,19 +436,19 @@ export class UserController {
       if (subscriptionObj) {
         await Subscription.deleteOne({ _id: subscriptionObj.id });
         return res.status(404).send({
-          message: "Subscription removed successfully.",
+          message: 'Subscription removed successfully.',
           success: false,
         });
       }
       if (userToSubscribe.id == req.user.id) {
         return res.status(400).send({
-          message: "Cant subscribe to own id",
+          message: 'Cant subscribe to own id',
           success: false,
         });
       }
 
       const subscriptionTime = createSubscriptionTime(renewalPeriod);
-      console.log("subsTime===", subscriptionTime);
+      console.log('subsTime===', subscriptionTime);
       const subscription = await Subscription.create({
         subscribeFrom: req.user.id,
         subscribeTo: userId,
@@ -456,7 +458,7 @@ export class UserController {
       });
       return res.status(201).send({
         success: true,
-        message: "Subscription added successfully",
+        message: 'Subscription added successfully',
         data: subscription,
       });
     } catch (error) {
@@ -529,7 +531,7 @@ export class UserController {
       if (!subscription) {
         return res.status(404).send({
           succe: false,
-          message: "Subscription not found",
+          message: 'Subscription not found',
         });
       }
       const upgradeOrDownStatus = determineUpOrDownSubs(
@@ -537,9 +539,9 @@ export class UserController {
         renewalPeriod
       );
 
-      console.log("UpgradeDownValue==", upgradeOrDownStatus);
+      console.log('UpgradeDownValue==', upgradeOrDownStatus);
 
-      if (upgradeOrDownStatus === "Upgrade") {
+      if (upgradeOrDownStatus === 'Upgrade') {
         if (subscription.isExpired) {
           //no need to perform date manipulation
           const newsubscriptionTime = createSubscriptionTime(renewalPeriod);
@@ -548,25 +550,25 @@ export class UserController {
           await subscription.save();
           return res.status(200).send({
             success: true,
-            message: "Subscription added successfully",
+            message: 'Subscription added successfully',
           });
         } else {
           const newsubscriptionTime = createSubscriptionTime(renewalPeriod);
           const expiryTime = moment(subscription.expiryTime).utc();
-          console.log("expiry-time===", expiryTime);
+          console.log('expiry-time===', expiryTime);
 
           const currentDate = moment().utc();
 
-          const daysDiff = expiryTime.diff(currentDate, "days");
+          const daysDiff = expiryTime.diff(currentDate, 'days');
 
-          console.log("new Expiry Date before==", newsubscriptionTime);
+          console.log('new Expiry Date before==', newsubscriptionTime);
 
           const newExpiryDate = newsubscriptionTime
             .add({
               days: daysDiff,
             })
             .utc();
-          console.log("new Expiry Date after days add==", newsubscriptionTime);
+          console.log('new Expiry Date after days add==', newsubscriptionTime);
           // console.log("new subscription time==", newExpiryDate);
 
           subscription.expiryTime = newExpiryDate;
@@ -574,7 +576,7 @@ export class UserController {
           await subscription.save();
           res.status(200).send({
             success: true,
-            message: "Subscription upgraded successfully",
+            message: 'Subscription upgraded successfully',
           });
         }
       } else {
@@ -585,11 +587,65 @@ export class UserController {
         await subscription.save();
         res.status(200).send({
           success: true,
-          message: "Subscription downgraded successfully",
+          message: 'Subscription downgraded successfully',
         });
       }
     } catch (error) {
       console.log(error);
+      res.status(500).send(serverError);
+    }
+  };
+
+  static displayMfaQr = async (req, res) => {
+    try {
+      const { QR, secret } = await generateQRCodeURL();
+      console.log('mfa-status', req.user.mfaEnabled);
+
+      if (req.user.mfaEnabled) {
+        return res.status(200).send({
+          success: true,
+          message: 'Mfa alredy enabled',
+        });
+      }
+      await User.updateOne({ _id: req.user.id }, { googleAuthSecret: secret });
+      return res.status(200).send({
+        message: 'Qr generated successfully',
+        success: true,
+        data: QR,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(serverError);
+    }
+  };
+
+  static enableMfa = async (req, res) => {
+    const { otp } = req.body;
+    try {
+      console.log('user-secret===', req.user.googleAuthSecret);
+      console.log('req.body.otp===', req.body.otp);
+      const secret = req.user.googleAuthSecret;
+      const result = verifyOTP(secret, otp);
+      if (result) {
+        const data = await User.updateOne(
+          { _id: req.user.id },
+          { mfaEnabled: true },
+          { new: true }
+        );
+        return res.status(200).send({
+          success: true,
+          message: 'Mfa enabled',
+          data: data,
+        });
+      } else {
+        return res.status(400).send({
+          success: false,
+          message: 'Cant enable mfa. Invalid token',
+        });
+      }
+    } catch (error) {
+      console.log('inside catch==');
+      console.log('error=====', error);
       res.status(500).send(serverError);
     }
   };

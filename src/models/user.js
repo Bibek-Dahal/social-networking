@@ -1,13 +1,13 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { saltRound } from "../constants.js";
-import "dotenv/config";
-import { v4 as uuidv4 } from "uuid";
-import { accessTokenLifeTime, refreshTokenLifeTime } from "../constants.js";
-import { Profile } from "./profile.js";
-import { userRoles } from "../constants.js";
-import { Post } from "./post.js";
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { saltRound } from '../constants.js';
+import 'dotenv/config';
+import { v4 as uuidv4 } from 'uuid';
+import { accessTokenLifeTime, refreshTokenLifeTime } from '../constants.js';
+import { Profile } from './profile.js';
+import { userRoles } from '../constants.js';
+import { Post } from './post.js';
 
 const { Schema } = mongoose;
 
@@ -30,7 +30,7 @@ const userSchema = new Schema(
       default: false,
     },
     role: {
-      type: "String",
+      type: 'String',
       enum: [userRoles.Admin, userRoles.User],
       default: userRoles.User,
     },
@@ -38,12 +38,19 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    mfaEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    googleAuthSecret: {
+      type: String,
+    },
     password: {
       type: String,
       required: true,
     },
-    followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    following: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
   {
     timestamps: true,
@@ -87,18 +94,18 @@ userSchema.methods.generateJwtTokens = function () {
       );
       resolve({ accessToken, refreshToken, uuid });
     } catch (error) {
-      reject({ message: "Jwt token cant be created." });
+      reject({ message: 'Jwt token cant be created.' });
     }
   });
 
   return jwtPromise;
 };
 
-userSchema.pre("save", function (next) {
+userSchema.pre('save', function (next) {
   let user = this;
 
   // only hash the password if it has been modified (or is new)
-  if (!user.isModified("password")) return next();
+  if (!user.isModified('password')) return next();
 
   // hash the password using our new salt
   bcrypt.hash(user.password, saltRound, function (err, hash) {
@@ -110,13 +117,13 @@ userSchema.pre("save", function (next) {
   });
 });
 
-userSchema.post("save", async function (doc, next) {
-  console.log("user post save called ");
+userSchema.post('save', async function (doc, next) {
+  console.log('user post save called ');
   const user = doc;
   try {
     const profile = await Profile.findOne({ user: user._id });
     if (profile) {
-      console.log("profile==", profile);
+      console.log('profile==', profile);
       next();
     } else {
       Profile.create({
@@ -130,18 +137,18 @@ userSchema.post("save", async function (doc, next) {
   }
 });
 
-userSchema.virtual("profile", {
-  ref: "Profile",
-  localField: "_id",
-  foreignField: "user",
+userSchema.virtual('profile', {
+  ref: 'Profile',
+  localField: '_id',
+  foreignField: 'user',
   justOne: true,
 });
 
-userSchema.virtual("postCount", {
-  ref: "Post",
-  localField: "_id",
-  foreignField: "user",
+userSchema.virtual('postCount', {
+  ref: 'Post',
+  localField: '_id',
+  foreignField: 'user',
   count: true,
 });
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 export { User };
