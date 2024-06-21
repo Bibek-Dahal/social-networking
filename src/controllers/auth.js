@@ -63,6 +63,12 @@ export class AuthController {
     const { email, password } = req.body;
     try {
       const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(400).send({
+          message: 'The provided credential do not match our record',
+          success: false,
+        });
+      }
       if (!user.isEmailVerified) {
         const { token: emailToken } = await generateToken(
           user,
@@ -84,12 +90,6 @@ export class AuthController {
         return res.status(400).send({
           message:
             'We are sorry to notify you that you are restricted to access this site. Please contact support for further information.',
-          success: false,
-        });
-      }
-      if (!user) {
-        return res.status(400).send({
-          message: 'The provided credential do not match our record',
           success: false,
         });
       }
