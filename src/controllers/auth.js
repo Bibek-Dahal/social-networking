@@ -156,29 +156,24 @@ export class AuthController {
       const token = await Jwt.findOne({ uuid: jwtToken.data.uuid });
       if (!token) {
         return res.status(404).send({
-          message: 'Token doesnot exists',
+          message:
+            'Cant login with given token. Either token is expired or doesnot exists',
           success: false,
         });
       }
-      if (token.isBlackListed) {
-        return res.status(400).send({
-          message: 'Unable to login. Either token is expired or blacklisted',
-          success: false,
-        });
-      } else {
-        const newAccessToken = await generateAccessToken({
-          id: jwtToken.data.id,
-          userName: jwtToken.data.userName,
-          email: jwtToken.data.email,
-        });
-        return res.status(200).send({
-          message: 'Access token generated successfully',
-          success: true,
-          data: {
-            accessToken: newAccessToken,
-          },
-        });
-      }
+
+      const newAccessToken = await generateAccessToken({
+        id: jwtToken.data.id,
+        userName: jwtToken.data.userName,
+        email: jwtToken.data.email,
+      });
+      return res.status(200).send({
+        message: 'Access token generated successfully',
+        success: true,
+        data: {
+          accessToken: newAccessToken,
+        },
+      });
     } catch (error) {
       console.log('error', error);
       res.status(500).send({
@@ -201,10 +196,10 @@ export class AuthController {
         });
       }
 
-      const token = await Jwt.findOne({ uuid: jwtToken.data.uuid });
+      const token = await Jwt.findOneAndDelete({ uuid: jwtToken.data.uuid });
 
-      token.isBlackListed = true;
-      await token.save();
+      // token.isBlackListed = true;
+      // await token.save();
       return res.status(200).send({
         message: 'User log out successfull',
         success: true,
@@ -219,14 +214,9 @@ export class AuthController {
 
   static logoutFromAllDevice = async (req, res) => {
     try {
-      await Jwt.updateMany(
-        {
-          user: req.user.id,
-        },
-        {
-          isBlackListed: true,
-        }
-      );
+      await Jwt.deleteMany({
+        user: req.user.id,
+      });
 
       return res.status(200).send({
         message: 'Logged out from all devices',
@@ -267,14 +257,9 @@ export class AuthController {
       await currentUser.save();
       //logout current authenticated user from all device
       if (logoutFromAllDevice) {
-        await Jwt.updateMany(
-          {
-            user: req.user.id,
-          },
-          {
-            isBlackListed: true,
-          }
-        );
+        await Jwt.deleteMany({
+          user: req.user.id,
+        });
       }
 
       return res.status(200).send({

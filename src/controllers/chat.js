@@ -67,14 +67,16 @@ export class ChatController {
       const rooms = await Room.find({
         participents: { $in: req.user.id },
       });
-      console.log('rooms ===');
+      console.log('rooms ===', rooms);
 
       const lastMessagesPromises = rooms.map(async (item) => {
         const chat = await Chat.findOne({
           room: item.room,
         }).sort('-createdAt');
         console.log('chat===', chat);
-        return chat;
+        if (chat != null) {
+          return chat;
+        }
       });
 
       const lastMessages = await Promise.all(lastMessagesPromises);

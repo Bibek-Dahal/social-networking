@@ -1,21 +1,17 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
 const jwtSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   uuid: {
     type: Schema.Types.UUID,
     required: true,
-  },
-  isBlackListed: {
-    type: Boolean,
-    default: false,
   },
   createdAt: {
     type: Date,
@@ -28,5 +24,5 @@ jwtSchema.index(
   { expireAfterSeconds: Math.floor(Date.now() / 1000) + 15 * 24 * 60 * 60 }
 );
 
-const Jwt = mongoose.model("Jwt", jwtSchema);
+const Jwt = mongoose.model('Jwt', jwtSchema);
 export { Jwt };
