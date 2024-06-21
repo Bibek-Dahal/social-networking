@@ -56,7 +56,7 @@ export class UserController {
   //         userToFollow.save();
   //       }
 
-  //       const userCurrentFollowings = req.user.following.map((item) =>
+  //       const userCurrentFollowings = req.user.following.map((item) =>await
   //         item.toString()
   //       );
   //       console.log(userCurrentFollowings);

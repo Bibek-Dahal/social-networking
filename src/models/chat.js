@@ -17,8 +17,11 @@ const chatSchema = new Schema(
     },
     room: {
       type: String,
-      unique: true,
       trim: true,
+    },
+    isRead: {
+      type: Boolean,
+      default: false,
     },
     message: {
       type: String,

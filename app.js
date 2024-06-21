@@ -1,28 +1,37 @@
 import express from 'express';
 import { connectDb } from './src/config/connect_db.js';
 import bodyParser from 'body-parser';
-import auth from './src/routes/auth.js';
-import user from './src/routes/user.js';
-import profile from './src/routes/profile.js';
-import post from './src/routes/post.js';
-import comment from './src/routes/comment.js';
-import home from './src/routes/home.js';
-import like from './src/routes/like.js';
-import adminUser from './src/routes/admin/user.js';
-import adminPost from './src/routes/admin/post.js';
-import subscription from './src/routes/admin/subscription.js';
-import event from './src/routes/event.js';
-import chat from './src/routes/chat.js';
+import {
+  auth,
+  user,
+  post,
+  profile,
+  comment,
+  event,
+  adminPost,
+  like,
+  chat,
+  subscription,
+  home,
+  adminUser,
+} from './src/routes/index.js';
 import './src/passport/stratigies/jwt_strategy.js';
 import './src/passport/stratigies/google_strategy.js';
 import { seedUsers } from './src/seeders/user.js';
 import { seedPost } from './src/seeders/post.js';
 import { scheduleCron } from './src/utils/cron-job.js';
 
+import cors from 'cors';
+const corsOptions = {
+  origin: '*',
+  // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
 // import { generateSecretKey } from "./src/utils/generateSecretKey.js";
 export const baseDir = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 8000;
+app.use(cors(corsOptions));
 //middlewares
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -42,7 +51,7 @@ app.use('/api/admin/posts', adminPost);
 app.use('/api/admin/subscriptions', subscription);
 
 app.get('/', async (req, res) => {
-  res.send('Hello World');
+  res.status(200).send({ data: 'Hello World' });
 });
 
 connectDb().then(() => {
@@ -81,3 +90,5 @@ import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 import moment from 'moment';
 console.log(moment().utc());
 console.log(moment.utc().local());
+
+// import './src/utils/eventHandler.js';

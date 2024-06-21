@@ -11,4 +11,5 @@ router.post('/private/:receiverId', [
   ChatController.createPrivateMessage,
 ]);
 router.get('/last-msg-with-users', [ChatController.listLastMsgWithUsers]);
+router.get('/messages/:userId', ChatController.listAllMessages);
 export default router;

@@ -49,6 +49,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    userPostCount: {
+      type: Number,
+      default: 0,
+    },
     followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
