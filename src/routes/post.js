@@ -4,6 +4,7 @@ import { postUpload } from '../config/multer_config.js';
 import { PostValidator } from '../middlewares/validators/post_validator.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { userBlockMiddleware } from '../middlewares/userBlockMiddleware.js';
+import { checkMongoId } from '../utils/checkIfMongoId.js';
 const router = express.Router();
 
 router.use(authMiddleware);
@@ -15,6 +16,7 @@ router.post('/', [
 ]);
 
 router.patch('/:id', [
+  checkMongoId,
   postUpload.single('image'),
   PostValidator.updatePost,
   PostController.updatePost,
@@ -22,8 +24,8 @@ router.patch('/:id', [
 //list all user posts
 router.get('/', [PostController.listAllPosts]);
 
-router.delete('/:id', PostController.deletePost);
+router.delete('/:id', checkMongoId, PostController.deletePost);
 
-router.get('/:id', PostController.getPostById);
+router.get('/:id', checkMongoId, PostController.getPostById);
 
 export default router;
