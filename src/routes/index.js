@@ -10,3 +10,4 @@ export { default as adminPost } from './admin/post.js';
 export { default as subscription } from './admin/subscription.js';
 export { default as event } from './event.js';
 export { default as chat } from './chat.js';
+export { default as test } from './test.js';
