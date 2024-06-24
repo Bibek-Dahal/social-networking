@@ -77,7 +77,10 @@ router.post('/logout-from-all-devices', [
   AuthController.logoutFromAllDevice,
 ]);
 
-router.post('/token/refresh', [AuthController.generateNewAccessToken]);
+router.post('/token/refresh', [
+  AuthValidator.refreshToken,
+  AuthController.generateNewAccessToken,
+]);
 router.post('/verify-email', AuthController.verifyEmail);
 router.post('/verify-otp', AuthController.verifyUserOtp);
 

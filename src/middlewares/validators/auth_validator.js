@@ -1,5 +1,5 @@
-import Joi from "joi";
-import showValidationsError from "../../utils/display_validation_error.js";
+import Joi from 'joi';
+import showValidationsError from '../../utils/display_validation_error.js';
 
 export class AuthValidator {
   static pswdPtrn =
@@ -16,16 +16,16 @@ export class AuthValidator {
         .pattern(new RegExp(AuthValidator.pswdPtrn))
         .required()
         .messages({
-          "string.pattern.base":
-            "Password must contain atleast one digit one special character and one upper case letter",
+          'string.pattern.base':
+            'Password must contain atleast one digit one special character and one upper case letter',
         }),
 
       repeat_password: Joi.any()
-        .valid(Joi.ref("password"))
+        .valid(Joi.ref('password'))
         .required()
         .messages({
-          "any.only": "password and repeat password do not match",
-          "any.required": "{{#label}} is required",
+          'any.only': 'password and repeat password do not match',
+          'any.required': '{{#label}} is required',
         }),
     });
 
@@ -61,16 +61,16 @@ export class AuthValidator {
         .pattern(new RegExp(AuthValidator.pswdPtrn))
         .required()
         .messages({
-          "string.pattern.base":
-            "Password must contain atleast one digit one special character and one upper case letter",
+          'string.pattern.base':
+            'Password must contain atleast one digit one special character and one upper case letter',
         }),
 
       newPassword2: Joi.any()
-        .valid(Joi.ref("newPassword1"))
+        .valid(Joi.ref('newPassword1'))
         .required()
         .messages({
-          "any.only": "password and repeat password do not match",
-          "any.required": "{{#label}} is required",
+          'any.only': 'password and repeat password do not match',
+          'any.required': '{{#label}} is required',
         }),
     });
 
@@ -99,16 +99,16 @@ export class AuthValidator {
         .pattern(new RegExp(AuthValidator.pswdPtrn))
         .required()
         .messages({
-          "string.pattern.base":
-            "Password must contain atleast one digit one special character and one upper case letter",
+          'string.pattern.base':
+            'Password must contain atleast one digit one special character and one upper case letter',
         }),
 
       newPassword2: Joi.any()
-        .valid(Joi.ref("newPassword1"))
+        .valid(Joi.ref('newPassword1'))
         .required()
         .messages({
-          "any.only": "password and repeat password do not match",
-          "any.required": "{{#label}} is required",
+          'any.only': 'password and repeat password do not match',
+          'any.required': '{{#label}} is required',
         }),
     });
 
