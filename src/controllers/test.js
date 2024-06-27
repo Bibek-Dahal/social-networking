@@ -34,6 +34,14 @@ export class TestController {
       if (!test) {
         return res.status(404).send({});
       }
+      const testWithEmail = await Test.findOne({
+        $and: [{ email: req.body.email }, { _id: { $ne: test._id } }],
+      });
+      if (testWithEmail) {
+        let errors = {};
+        errors.email = 'User with email already exists';
+        return res.status(400).send({ errors });
+      }
       await Test.updateOne(
         { _id: testId },
         {
