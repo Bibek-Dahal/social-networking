@@ -21,6 +21,7 @@ import './src/passport/stratigies/google_strategy.js';
 import { seedUsers } from './src/seeders/user.js';
 import { seedPost } from './src/seeders/post.js';
 import { scheduleCron } from './src/utils/cron-job.js';
+import ngrok from '@ngrok/ngrok';
 
 import cors from 'cors';
 const corsOptions = {
@@ -65,6 +66,18 @@ connectDb().then(() => {
 app.listen(PORT, () => {
   console.log(`App listening on PORT:${PORT}`);
 });
+
+(async function () {
+  // Establish connectivity
+  const listener = await ngrok.forward({
+    addr: 8000,
+    // authtoken_from_env: true,
+    authtoken: '2id1K5Hu2mDvaxlR5Ml5C274hba_6jxn94pbkggKsvGg51Dcp',
+  });
+
+  // Output ngrok url to console
+  console.log(`Ingress established at: ${listener.url()}`);
+})();
 
 import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 

@@ -37,6 +37,7 @@ export class AuthController {
         user,
         verificationEmailLifeTime
       );
+
       sendMail({
         user,
         subject: 'User Verification Email',
