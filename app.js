@@ -67,17 +67,17 @@ app.listen(PORT, () => {
   console.log(`App listening on PORT:${PORT}`);
 });
 
-(async function () {
-  // Establish connectivity
-  const listener = await ngrok.forward({
-    addr: 8000,
-    // authtoken_from_env: true,
-    authtoken: '2id1K5Hu2mDvaxlR5Ml5C274hba_6jxn94pbkggKsvGg51Dcp',
-  });
+// (async function () {
+//   // Establish connectivity
+//   const listener = await ngrok.forward({
+//     addr: 8000,
+//     // authtoken_from_env: true,
+//     authtoken: '2id1K5Hu2mDvaxlR5Ml5C274hba_6jxn94pbkggKsvGg51Dcp',
+//   });
 
-  // Output ngrok url to console
-  console.log(`Ingress established at: ${listener.url()}`);
-})();
+//   // Output ngrok url to console
+//   console.log(`Ingress established at: ${listener.url()}`);
+// })();
 
 import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 
