@@ -1,5 +1,9 @@
 import express from 'express';
 import { connectDb } from './src/config/connect_db.js';
+import 'dotenv/config';
+import jwt from 'jsonwebtoken';
+import { GraphQLError } from 'graphql';
+import { User } from './src/models/user.js';
 import bodyParser from 'body-parser';
 import {
   auth,
@@ -22,8 +26,15 @@ import { seedUsers } from './src/seeders/user.js';
 import { seedPost } from './src/seeders/post.js';
 import { scheduleCron } from './src/utils/cron-job.js';
 import ngrok from '@ngrok/ngrok';
-
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import http from 'http';
+import { resolvers } from './src/graphql/resolvers.js';
+import { readFileSync } from 'fs';
+import gql from 'graphql-tag';
 import cors from 'cors';
+import customAuthMiddleware from './src/middlewares/custom_auth_middleware.js';
 const corsOptions = {
   origin: '*',
   // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -63,9 +74,31 @@ connectDb().then(() => {
   // scheduleCron();
 });
 
-app.listen(PORT, () => {
-  console.log(`App listening on PORT:${PORT}`);
+const typeDefs = gql(
+  readFileSync('./src/graphql/schema.graphql', {
+    encoding: 'utf-8',
+  })
+);
+const httpServer = http.createServer(app);
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
+await server.start();
+app.use(
+  '/graphql',
+  cors(),
+  express.json(),
+  expressMiddleware(server, {
+    context: async ({ req }) => {
+      // console.log('hello', req.path);
+      return { token: req.headers.authorization };
+    },
+  })
+);
+await new Promise((resolve) => httpServer.listen({ port: 8000 }, resolve));
+console.log(`🚀 Server ready at http://localhost:8000${server.graphqlPath}`);
 
 // (async function () {
 //   // Establish connectivity
@@ -103,6 +136,8 @@ import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 // console.log(timezoneName);
 
 import moment from 'moment';
+import { authMiddleware } from './src/middlewares/auth.js';
+
 console.log(moment().utc());
 console.log(moment.utc().local());
 

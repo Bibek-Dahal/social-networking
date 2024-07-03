@@ -1,0 +1,29 @@
+type User {
+  _id: ID
+  userName: String
+  email: String
+  followers: [User]
+  following: [User]
+  isEmailVerified: Boolean
+  role: String
+  blockUser: Boolean
+  mfaEnabled: Boolean
+  userPostCount: Int
+}
+
+type UserPost {
+  _id: ID
+  user: User
+  title: String
+  description: String
+  commentCount: Int
+  likeCount: Int
+  image: String
+  createdAt: String
+  updatedAt: String
+}
+
+type Query {
+  listUserPosts: [UserPost]
+  getLoggedInUser: User
+}
