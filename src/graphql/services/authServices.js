@@ -1,13 +1,9 @@
-import jwt from 'jsonwebtoken';
+import { UserRepository } from '../repository/userRepository.js';
 import { GraphQLError } from 'graphql';
-import { User } from '../models/user.js';
-import 'dotenv/config';
-import { Post } from '../models/post.js';
-
-export class UserRepository {
+import jwt from 'jsonwebtoken';
+export class AuthService {
   static getUserFromToken = async (token) => {
-    // console.log('jwtSercret', process.env.JWT_SECRET);
-    // console.log('token===', token.split(' ')[1]);
+    // console.log('get user from login called--');
     try {
       if (!token || !token.startsWith('Bearer ')) {
         throw new GraphQLError('User is not authenticated', {
@@ -25,9 +21,7 @@ export class UserRepository {
       );
 
       // Fetch user based on decoded token
-      const user = await User.findById(decodedToken.data.id);
-
-      // console.log('user===', user);
+      const user = await UserRepository.findUserById(decodedToken.data.id);
 
       // console.log('decodedtoken user id===', decodedToken.data.id);
 
@@ -43,6 +37,7 @@ export class UserRepository {
       // Attach authenticated user to context
       return user;
     } catch (error) {
+      //   console.log(':error==', error);
       throw new GraphQLError('Authentication failed', {
         extensions: {
           code: 'UNAUTHENTICATED',
@@ -51,10 +46,8 @@ export class UserRepository {
       });
     }
   };
-
-  static listUserPost = async (context) => {
-    const posts = await Post.find({ user: context.user.id }).populate('user');
-
-    return posts;
+  static getLoggedInUser = async (userId) => {
+    const user = await UserRepository.findUserById(userId);
+    return user;
   };
 }

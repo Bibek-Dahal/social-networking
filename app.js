@@ -83,6 +83,7 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  introspection: true,
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 await server.start();
@@ -93,9 +94,10 @@ app.use(
   expressMiddleware(server, {
     context: async ({ req }) => {
       // console.log('hello', req.path);
-      const user = await UserRepository.getUserFromToken(
+      const user = await AuthService.getUserFromToken(
         req.headers.authorization
       );
+      // console.log(user);
       return { user };
     },
   })
@@ -140,7 +142,8 @@ import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 
 import moment from 'moment';
 import { authMiddleware } from './src/middlewares/auth.js';
-import { UserRepository } from './src/repository/userRepository.js';
+import { UserRepository } from './src/graphql/repository/userRepository.js';
+import { AuthService } from './src/graphql/services/authServices.js';
 
 console.log(moment().utc());
 console.log(moment.utc().local());

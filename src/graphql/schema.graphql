@@ -34,12 +34,33 @@ input UserPostContent {
   description: String
 }
 
+input SingUpInput {
+  userName: String!
+  email: String!
+  password: String!
+  repeatPassword: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginResponse {
+  accessToken: String!
+  refreshToken: String!
+  data: User!
+}
+
 type Query {
   listUserPosts: [UserPost]
   getLoggedInUser: User
+  getPostById(postId: String): UserPost
 }
 
 type Mutation {
-  createPost(content: UserPostContent!): Post
-  # updateBlogPost(id: ID!, content: BlogPostContent!): Post
+  createPost(input: UserPostContent!): Post
+  register(input: SingUpInput!): User
+  login(input: LoginInput!): LoginResponse
+  refreshToken(refreshToken: String!): String
 }

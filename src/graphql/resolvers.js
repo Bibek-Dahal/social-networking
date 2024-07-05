@@ -1,22 +1,23 @@
 import { Post } from '../models/post.js';
-import { PostRepository } from '../repository/postRepository.js';
-import { UserRepository } from '../repository/userRepository.js';
-
-const listUserPost = async (_, args, context) => {
-  console.log('List user post called', context.user);
-  const posts = await Post.find().populate('user');
-
-  return posts;
-};
+import { AuthRepository } from './repository/authRepository.js';
+import { PostRepository } from './repository/postRepository.js';
+import { AuthService } from './services/authServices.js';
 
 export const resolvers = {
   Query: {
-    listUserPosts: (_, args, context) => UserRepository.listUserPost(context),
+    listUserPosts: (_, args, context) =>
+      PostRepository.listUserPost(context.user.id),
     getLoggedInUser: (_, args, context) =>
-      UserRepository.getUserFromToken(context.token),
+      AuthService.getLoggedInUser(context.user.id),
+    getPostById: (_, args, context) => PostRepository.getPostById(args.postId),
   },
 
   Mutation: {
-    createPost: (_, args, context) => PostRepository.createPost(args, context),
+    createPost: (_, args, context) =>
+      PostRepository.createPost(args.input, context.user.id),
+    register: (_, args, context) => AuthRepository.register(args.input),
+    login: (_, args, context) => AuthRepository.login(args.input),
+    refreshToken: (_, args, context) =>
+      AuthRepository.refreshToken(args.refreshToken),
   },
 };
