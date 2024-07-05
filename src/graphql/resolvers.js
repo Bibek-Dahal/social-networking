@@ -1,4 +1,5 @@
 import { Post } from '../models/post.js';
+import { PostRepository } from '../repository/postRepository.js';
 import { UserRepository } from '../repository/userRepository.js';
 
 const listUserPost = async (_, args, context) => {
@@ -13,5 +14,9 @@ export const resolvers = {
     listUserPosts: (_, args, context) => UserRepository.listUserPost(context),
     getLoggedInUser: (_, args, context) =>
       UserRepository.getUserFromToken(context.token),
+  },
+
+  Mutation: {
+    createPost: (_, args, context) => PostRepository.createPost(args, context),
   },
 };

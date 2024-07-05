@@ -6,8 +6,8 @@ import { Post } from '../models/post.js';
 
 export class UserRepository {
   static getUserFromToken = async (token) => {
-    console.log('jwtSercret', process.env.JWT_SECRET);
-    console.log('token===', token.split(' ')[1]);
+    // console.log('jwtSercret', process.env.JWT_SECRET);
+    // console.log('token===', token.split(' ')[1]);
     try {
       if (!token || !token.startsWith('Bearer ')) {
         throw new GraphQLError('User is not authenticated', {
@@ -27,9 +27,9 @@ export class UserRepository {
       // Fetch user based on decoded token
       const user = await User.findById(decodedToken.data.id);
 
-      console.log('user===', user);
+      // console.log('user===', user);
 
-      console.log('decodedtoken user id===', decodedToken.data.id);
+      // console.log('decodedtoken user id===', decodedToken.data.id);
 
       if (!user) {
         throw new GraphQLError('User not found', {
@@ -53,10 +53,7 @@ export class UserRepository {
   };
 
   static listUserPost = async (context) => {
-    const user = await UserRepository.getUserFromToken(context.token);
-    console.log('loggedIn user====', user);
-
-    const posts = await Post.find({ user: user.id }).populate('user');
+    const posts = await Post.find({ user: context.user.id }).populate('user');
 
     return posts;
   };

@@ -93,7 +93,10 @@ app.use(
   expressMiddleware(server, {
     context: async ({ req }) => {
       // console.log('hello', req.path);
-      return { token: req.headers.authorization };
+      const user = await UserRepository.getUserFromToken(
+        req.headers.authorization
+      );
+      return { user };
     },
   })
 );
@@ -137,6 +140,7 @@ import { generateQRCodeURL } from './src/utils/generateQrCode.js';
 
 import moment from 'moment';
 import { authMiddleware } from './src/middlewares/auth.js';
+import { UserRepository } from './src/repository/userRepository.js';
 
 console.log(moment().utc());
 console.log(moment.utc().local());

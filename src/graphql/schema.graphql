@@ -11,6 +11,12 @@ type User {
   userPostCount: Int
 }
 
+type Post {
+  _id: ID!
+  title: String!
+  description: String
+}
+
 type UserPost {
   _id: ID
   user: User
@@ -23,7 +29,17 @@ type UserPost {
   updatedAt: String
 }
 
+input UserPostContent {
+  title: String!
+  description: String
+}
+
 type Query {
   listUserPosts: [UserPost]
   getLoggedInUser: User
+}
+
+type Mutation {
+  createPost(content: UserPostContent!): Post
+  # updateBlogPost(id: ID!, content: BlogPostContent!): Post
 }
