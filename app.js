@@ -83,7 +83,6 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  introspection: true,
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 await server.start();
@@ -94,6 +93,14 @@ app.use(
   expressMiddleware(server, {
     context: async ({ req }) => {
       // console.log('hello', req.path);
+      // console.log('req.body', req.body.operationName);
+      if (
+        req.body.operationName === 'Register' ||
+        req.body.operationName === 'Login' ||
+        req.body.operationName === 'RefreshToken'
+      ) {
+        return {};
+      }
       const user = await AuthService.getUserFromToken(
         req.headers.authorization
       );
