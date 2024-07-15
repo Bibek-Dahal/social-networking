@@ -130,6 +130,8 @@ export class AuthController {
         message: 'User login successfull.',
         success: true,
       });
+
+      console.log('tokens===', tokens);
     } catch (error) {
       res.status(500).send({
         errors: {

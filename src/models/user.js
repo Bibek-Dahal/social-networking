@@ -76,6 +76,7 @@ userSchema.methods.generateJwtTokens = function () {
       const accessToken = jwt.sign(
         {
           exp: Math.floor(Date.now() / 1000) + accessTokenLifeTime,
+          isAccess: true,
           data: {
             id: user._id,
             userName: user.userName,
@@ -87,6 +88,7 @@ userSchema.methods.generateJwtTokens = function () {
       const refreshToken = jwt.sign(
         {
           exp: Math.floor(Date.now() / 1000) + refreshTokenLifeTime,
+          isAccess: false,
           data: {
             uuid: uuid,
             id: this._id,

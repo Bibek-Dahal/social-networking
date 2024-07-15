@@ -92,7 +92,7 @@ export class AuthRepository {
       throw new GraphQLError('Token Expired', {
         extensions: {
           code: 'BAD_REQUEST',
-          http: { status: 400 },
+          http: { status: 401 },
         },
       });
     }

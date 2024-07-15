@@ -33,6 +33,7 @@ import http from 'http';
 import { resolvers } from './src/graphql/resolvers.js';
 import { readFileSync } from 'fs';
 import gql from 'graphql-tag';
+import { ApolloServerErrorCode } from '@apollo/server/errors';
 import cors from 'cors';
 import customAuthMiddleware from './src/middlewares/custom_auth_middleware.js';
 const corsOptions = {
@@ -83,6 +84,20 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  formatError: (formattedError, error) => {
+    // Return a different error message
+    // if (formattedError.extensions.code === ApolloServerErrorCode.BAD_REQUEST) {
+    // console.log('formatted error===', formattedError);
+    return {
+      code: formattedError.extensions.code,
+      message: formattedError.message,
+    };
+    // }
+
+    // Otherwise return the formatted error. This error can also
+    // be manipulated in other ways, as long as it's returned.
+    return formattedError;
+  },
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 await server.start();
@@ -94,16 +109,16 @@ app.use(
     context: async ({ req }) => {
       // console.log('hello', req.path);
       // console.log('req.body', req.body.operationName);
-      if (
-        req.body.operationName === 'Register' ||
-        req.body.operationName === 'Login' ||
-        req.body.operationName === 'RefreshToken'
-      ) {
-        return {};
-      }
-      const user = await AuthService.getUserFromToken(
-        req.headers.authorization
-      );
+      // if (
+      //   req.body.operationName === 'Register' ||
+      //   req.body.operationName === 'Login' ||
+      //   req.body.operationName === 'RefreshToken'
+      // ) {
+      //   return {};
+      // }
+      // const user = await AuthService.getUserFromToken(
+      //   req.headers.authorization
+      // );
       // console.log(user);
       return { user };
     },
