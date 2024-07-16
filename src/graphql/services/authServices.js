@@ -46,8 +46,9 @@ export class AuthService {
       });
     }
   };
-  static getLoggedInUser = async (userId) => {
-    const user = await UserRepository.findUserById(userId);
+  static getLoggedInUser = async (token) => {
+    const user = await AuthService.getUserFromToken(token);
+
     return user;
   };
 }

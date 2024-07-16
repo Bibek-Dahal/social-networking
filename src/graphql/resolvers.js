@@ -6,15 +6,16 @@ import { AuthService } from './services/authServices.js';
 export const resolvers = {
   Query: {
     listUserPosts: (_, args, context) =>
-      PostRepository.listUserPost(context.user.id),
+      PostRepository.listUserPost(context.token),
     getLoggedInUser: (_, args, context) =>
-      AuthService.getLoggedInUser(context.user.id),
-    getPostById: (_, args, context) => PostRepository.getPostById(args.postId),
+      AuthService.getLoggedInUser(context.token),
+    getPostById: (_, args, context) =>
+      PostRepository.getPostById(context.token, args.postId),
   },
 
   Mutation: {
     createPost: (_, args, context) =>
-      PostRepository.createPost(args.input, context.user.id),
+      PostRepository.createPost(args.input, context.token),
     register: (_, args, context) => AuthRepository.register(args.input),
     login: (_, args, context) => AuthRepository.login(args.input),
     refreshToken: (_, args, context) =>

@@ -84,20 +84,20 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  formatError: (formattedError, error) => {
-    // Return a different error message
-    // if (formattedError.extensions.code === ApolloServerErrorCode.BAD_REQUEST) {
-    // console.log('formatted error===', formattedError);
-    return {
-      code: formattedError.extensions.code,
-      message: formattedError.message,
-    };
-    // }
+  // formatError: (formattedError, error) => {
+  //   // Return a different error message
+  //   // if (formattedError.extensions.code === ApolloServerErrorCode.BAD_REQUEST) {
+  //   // console.log('formatted error===', formattedError);
+  //   return {
+  //     code: formattedError.extensions.code,
+  //     message: formattedError.message,
+  //   };
+  //   // }
 
-    // Otherwise return the formatted error. This error can also
-    // be manipulated in other ways, as long as it's returned.
-    return formattedError;
-  },
+  //   // Otherwise return the formatted error. This error can also
+  //   // be manipulated in other ways, as long as it's returned.
+  //   return formattedError;
+  // },
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 await server.start();
@@ -120,7 +120,8 @@ app.use(
       //   req.headers.authorization
       // );
       // console.log(user);
-      return { user };
+      const token = req.headers.authorization;
+      return { token };
     },
   })
 );
