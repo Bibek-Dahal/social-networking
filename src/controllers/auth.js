@@ -11,6 +11,9 @@ import { EmailToken } from '../models/userEmailToken.js';
 import { verifyOTP } from '../utils/verifyOtp.js';
 import { decryptData, encryptData } from '../utils/encryptDecrypt.js';
 import 'dotenv/config';
+import { OTPmodel } from '../models/otpModel.js';
+import { OtpType } from '../constants.js';
+import { generateOTP } from '../utils/generateOtp.js';
 
 export class AuthController {
   static register = async (req, res) => {
@@ -37,13 +40,20 @@ export class AuthController {
         user,
         verificationEmailLifeTime
       );
+      const otp = generateOTP();
 
       sendMail({
         user,
         subject: 'User Verification Email',
-        token: emailToken,
+        token: otp,
       });
       console.log('user===', user);
+      OTPmodel.create({
+        user: user.id,
+        isUsed: false,
+        otp: otp,
+        otpType: OtpType.Register,
+      });
 
       return res.status(201).send({
         message: 'User registration successfull',
@@ -60,6 +70,50 @@ export class AuthController {
     }
   };
 
+  static vefifyOtp = async (req, res) => {
+    const { userId, otp, otpType } = req.body;
+    try {
+      const otpModel = await OTPmodel.findOne({
+        user: userId,
+        otp: otp,
+        otpType: otpType,
+      });
+      console.log('otpModel==', otpModel);
+      const user = await User.findById(userId);
+      if (user && user.isEmailVerified) {
+        return res.status(200).send({
+          message: 'Email already verified',
+          success: true,
+        });
+      }
+
+      if (!user) {
+        return res.status(404).send({
+          message: 'User not found',
+          success: false,
+        });
+      }
+
+      if (otpModel && otpModel.isUsed == false) {
+        user.isEmailVerified = true;
+        otpModel.isUsed = true;
+        otpModel.save();
+        user.save();
+        return res.status(200).send({
+          message: 'Otp verification successfull',
+          success: true,
+        });
+      } else {
+        return res.status(400).send({
+          message: 'Otp couldnot be verified',
+          success: true,
+        });
+      }
+    } catch (error) {
+      return res.status(500).send(serverError);
+    }
+  };
+
   static login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -70,15 +124,26 @@ export class AuthController {
           success: false,
         });
       }
+      console.log('outside email not verifed');
       if (!user.isEmailVerified) {
+        console.log('inside email not verifed');
         const { token: emailToken } = await generateToken(
           user,
           verificationEmailLifeTime
         );
+        const otp = generateOTP();
+
+        console.log('user===', user);
+        OTPmodel.create({
+          user: user.id,
+          isUsed: false,
+          otp: otp,
+          otpType: OtpType.Register,
+        });
         sendMail({
           user,
           subject: 'User Verification Email',
-          token: emailToken,
+          token: otp,
         });
         return res.status(400).send({
           message:
@@ -102,7 +167,7 @@ export class AuthController {
           success: false,
         });
       }
-      console.log('secret-key', process.env.AES_SECRET_KEY);
+
       if (user.mfaEnabled) {
         const encryptedUserId = encryptData({
           data: user.id,
@@ -130,8 +195,6 @@ export class AuthController {
         message: 'User login successfull.',
         success: true,
       });
-
-      console.log('tokens===', tokens);
     } catch (error) {
       res.status(500).send({
         errors: {

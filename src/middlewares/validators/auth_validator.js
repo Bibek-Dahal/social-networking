@@ -41,6 +41,16 @@ export class AuthValidator {
     await showValidationsError(req, res, next, schema);
   };
 
+  static verifyOtp = async (req, res, next) => {
+    const schema = Joi.object({
+      userId: Joi.string().required(),
+      otp: Joi.string().required(),
+      otpType: Joi.string().required(),
+    });
+
+    await showValidationsError(req, res, next, schema);
+  };
+
   static logout = async (req, res, next) => {
     const schema = Joi.object({
       refreshToken: Joi.string().required(),

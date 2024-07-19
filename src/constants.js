@@ -29,3 +29,9 @@ export const serverError = {
   message: 'Something went wrong',
   success: false,
 };
+
+export const OtpType = {
+  Register: 'Register',
+  ResentOtp: 'ResentOtp',
+  PasswordReset: 'PasswordReset',
+};

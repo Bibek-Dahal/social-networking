@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { OtpType } from '../constants.js';
 const { Schema } = mongoose;
 
 const otpSchema = new Schema(
@@ -9,12 +10,16 @@ const otpSchema = new Schema(
       required: true,
     },
     otp: {
-      type: Number,
+      type: String,
       required: true,
     },
     isUsed: {
       type: Boolean,
       default: false,
+    },
+    otpType: {
+      type: String,
+      enum: [OtpType.Register, OtpType.PasswordReset, OtpType.ResentOtp],
     },
     expiresAt: {
       type: Date,

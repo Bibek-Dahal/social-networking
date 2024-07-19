@@ -9,6 +9,10 @@ import passport from 'passport';
 const router = express.Router();
 
 router.post('/register', [AuthValidator.register, AuthController.register]);
+router.post('/verify-user-email', [
+  AuthValidator.verifyOtp,
+  AuthController.vefifyOtp,
+]);
 router.get(
   '/login/google',
   passport.authenticate(
@@ -81,7 +85,7 @@ router.post('/token/refresh', [
   AuthValidator.refreshToken,
   AuthController.generateNewAccessToken,
 ]);
-router.post('/verify-email', AuthController.verifyEmail);
+// router.post('/verify-email', AuthController.verifyEmail);
 router.post('/verify-otp', AuthController.verifyUserOtp);
 
 export default router;
