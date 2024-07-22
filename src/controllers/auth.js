@@ -220,9 +220,13 @@ export class AuthController {
           secretKey: process.env.AES_SECRET_KEY,
         });
         console.log('encrypted-data', encryptedUserId);
-        return res.redirect(
-          `http://localhost:8000/verify-otp?id=${encryptedUserId}`
-        );
+        return res.status(209).send({
+          success: true,
+          userId: `${encryptedUserId}`,
+        });
+        // return res.redirect(
+        //   `http://localhost:8000/verify-otp?id=${encryptedUserId}`
+        // );
       }
 
       const tokens = await user.generateJwtTokens();
