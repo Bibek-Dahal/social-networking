@@ -19,7 +19,12 @@ const otpSchema = new Schema(
     },
     otpType: {
       type: String,
-      enum: [OtpType.Register, OtpType.PasswordReset, OtpType.ResentOtp],
+      enum: [
+        OtpType.Register,
+        OtpType.PasswordResetOtp,
+        OtpType.ResendRegisterOtp,
+        OtpType.ResendPasswordResetOtp,
+      ],
     },
     expiresAt: {
       type: Date,

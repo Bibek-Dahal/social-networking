@@ -58,6 +58,9 @@ export class AuthController {
       return res.status(201).send({
         message: 'User registration successfull',
         success: true,
+        data: {
+          userId: user.id,
+        },
       });
     } catch (error) {
       console.log(error);
@@ -67,6 +70,43 @@ export class AuthController {
           success: false,
         },
       });
+    }
+  };
+
+  static resendOtp = async (req, res) => {
+    const { userId, otpType } = req.body;
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).send({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      const otp = generateOTP();
+      sendMail({
+        user,
+        subject: 'Password Reset Email',
+        token: otp,
+      });
+
+      OTPmodel.create({
+        user: user.id,
+        isUsed: false,
+        otp: otp,
+        otpType: otpType,
+      });
+
+      return res.status(201).send({
+        message: 'Otp send successfully',
+        success: true,
+        data: {
+          userId: user.id,
+        },
+      });
+    } catch (error) {
+      res.status(500).send(serverError);
     }
   };
 
@@ -95,10 +135,15 @@ export class AuthController {
       }
 
       if (otpModel && otpModel.isUsed == false) {
-        user.isEmailVerified = true;
+        if (
+          otpType == OtpType.Register ||
+          otpType == OtpType.ResendRegisterOtp
+        ) {
+          user.isEmailVerified = true;
+          user.save();
+        }
         otpModel.isUsed = true;
         otpModel.save();
-        user.save();
         return res.status(200).send({
           message: 'Otp verification successfull',
           success: true,
@@ -146,6 +191,7 @@ export class AuthController {
           token: otp,
         });
         return res.status(400).send({
+          code: 'not-verified',
           message:
             'E-mail not verified. We have sent you verification email. Please verify your email address.',
           success: false,
@@ -384,17 +430,29 @@ export class AuthController {
         verificationEmailLifeTime
       );
 
+      const otp = generateOTP();
+
       await EmailToken.create({
         user: user.id,
         uuid: uuid,
       });
 
-      await sendMail({
+      OTPmodel.create({
+        user: user.id,
+        isUsed: false,
+        otp: otp,
+        otpType: OtpType.PasswordResetOtp,
+      });
+
+      sendMail({
         user,
         subject: 'Password Reset Email',
-        token: token,
+        token: otp,
       });
       return res.status(200).send({
+        data: {
+          userId: user.id,
+        },
         message: 'Password reset email sent',
         success: true,
       });

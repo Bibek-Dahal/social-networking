@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import showValidationsError from '../../utils/display_validation_error.js';
+import { OtpType } from '../../constants.js';
 
 export class AuthValidator {
   static pswdPtrn =
@@ -46,6 +47,17 @@ export class AuthValidator {
       userId: Joi.string().required(),
       otp: Joi.string().required(),
       otpType: Joi.string().required(),
+    });
+
+    await showValidationsError(req, res, next, schema);
+  };
+
+  static resendOtp = async (req, res, next) => {
+    const schema = Joi.object({
+      userId: Joi.string().required(),
+      otpType: Joi.any()
+        .valid(OtpType.ResendRegisterOtp, OtpType.ResendPasswordResetOtp)
+        .required(),
     });
 
     await showValidationsError(req, res, next, schema);

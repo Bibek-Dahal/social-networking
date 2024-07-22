@@ -13,6 +13,7 @@ router.post('/verify-user-email', [
   AuthValidator.verifyOtp,
   AuthController.vefifyOtp,
 ]);
+router.post('/resend-otp', [AuthValidator.resendOtp, AuthController.resendOtp]);
 router.get(
   '/login/google',
   passport.authenticate(

@@ -32,6 +32,7 @@ export const serverError = {
 
 export const OtpType = {
   Register: 'Register',
-  ResentOtp: 'ResentOtp',
-  PasswordReset: 'PasswordReset',
+  ResendRegisterOtp: 'ResendRegisterOtp',
+  PasswordResetOtp: 'PasswordResetOtp',
+  ResendPasswordResetOtp: 'ResendPasswordResetOtp',
 };
