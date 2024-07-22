@@ -11,6 +11,7 @@ export const checkMongoId = (req, res, next) => {
         });
       }
     }
+    next();
   } else {
     next();
   }
