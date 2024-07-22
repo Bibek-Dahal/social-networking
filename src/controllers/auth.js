@@ -466,32 +466,10 @@ export class AuthController {
   };
 
   static passwordResetConfirm = async (req, res) => {
-    const { token } = req.params;
-    const { newPassword1, newPassword2 } = req.body;
+    const { userId, newPassword1, newPassword2 } = req.body;
     try {
-      const userSubmittedToken = await verifyJwtToken(token);
-      if (!userSubmittedToken) {
-        return res.status(400).send({
-          success: false,
-          message: 'Token expired.',
-        });
-      }
+      const user = await User.findById(userId);
 
-      const emailToken = await EmailToken.findOne({
-        user: userSubmittedToken.data.id,
-        uuid: userSubmittedToken.data.uuid,
-      });
-
-      console.log('email-token==', emailToken);
-      if (!emailToken) {
-        return res.status(400).send({
-          success: false,
-          message:
-            'Email token has been already used or user with userId does not exists',
-        });
-      }
-
-      const user = await User.findById(userSubmittedToken.data.id);
       if (!user) {
         return res.status(404).send({
           success: false,
@@ -501,13 +479,11 @@ export class AuthController {
 
       user.password = newPassword1;
       await user.save();
-      const deletedToken = await EmailToken.deleteOne({ _id: emailToken._id });
-      console.log('deleted-token', deletedToken);
-      return res.redirect('/');
-      // return res.status(200).send({
-      //   success:true,
-      //   message:"Password reset successfull"
-      // })
+
+      return res.status(200).send({
+        success: true,
+        message: 'Password reset successfull',
+      });
     } catch (error) {
       console.log(error);
       res.status(500).send({

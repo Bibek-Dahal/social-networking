@@ -67,7 +67,7 @@ router.post('/password-reset', [
   AuthController.passwordReset,
 ]);
 
-router.post('/password-reset-confirm/:token', [
+router.post('/password-reset-confirm', [
   AuthValidator.passwordResetConfirm,
   AuthController.passwordResetConfirm,
 ]);
