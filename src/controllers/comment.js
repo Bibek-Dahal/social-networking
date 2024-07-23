@@ -23,11 +23,15 @@ export class CommentController {
         comment: comment,
       });
 
+      const populatedComment = comment.populate({
+        path: 'user',
+        select: '-password', // Exclude password field
+      });
+
       return res.status(201).send({
         success: true,
         data: {
-          user: req.user,
-          coment: comment,
+          coment: populatedComment,
         },
         message: 'Comment created successfully',
       });
@@ -96,7 +100,10 @@ export class CommentController {
   static getComment = async (req, res) => {
     const { commentId } = req.params;
     try {
-      const comment = await Comment.findById(commentId).populate('user');
+      const comment = await Comment.findById(commentId).populate({
+        path: 'user',
+        select: '-password', // Exclude password field
+      });
       if (comment) {
         return res.status(200).send({
           success: true,
@@ -121,9 +128,12 @@ export class CommentController {
   static listAllCommentOfPost = async (req, res) => {
     const { postId } = req.params;
     try {
-      const comments = await Comment.find({ post: postId }).populate(
-        'user post'
-      );
+      const comments = await Comment.find({ post: postId })
+        .populate({
+          path: 'user',
+          select: '-password', // Exclude password field
+        })
+        .populate('post');
       return res.status(200).send({
         success: true,
         data: comments,
