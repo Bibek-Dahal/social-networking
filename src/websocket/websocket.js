@@ -55,15 +55,22 @@ io.on('connection', async (socket) => {
   //join the room for private chatting
   socket.on('joinPrivateChatRoom', async (data) => {
     try {
-      const { userId } = JSON.parse(data);
+      const parsedData = data;
+      const { userId } = parsedData;
       const roomName = await ChatController.getOrCreateRoomName(
-        data.userId,
+        userId,
         socket.user.id
       );
+      console.log('roomName.room==', roomName.room);
       //join socket to room
-      socket.join(roomName);
+      socket.join(roomName.room);
     } catch (error) {
-      throw new Error('Cant connect to server');
+      console.log('error==', error);
+      console.error('Error processing private message:', error);
+      // Send error message back to the client
+      socket.emit('joinPrivateChatRoomError', {
+        error: 'Error processing private message',
+      });
     }
   });
 
@@ -75,7 +82,7 @@ io.on('connection', async (socket) => {
     // data = JSON.parse(data);
     console.log('data==', data);
     try {
-      let { receiver, message } = JSON.parse(data);
+      let { receiver, message } = data;
       console.log('receiver====', receiver);
       const roomName = await ChatController.getOrCreateRoomName(
         receiver,
@@ -108,18 +115,28 @@ io.on('connection', async (socket) => {
         sender: socket.user.id,
         receiver: receiver,
         message: message,
-        room: roomName,
+        room: roomName.room,
       });
 
-      const populated_chat = await newChat.populate('receiver sender');
+      console.log(newChat);
+
+      const populated_chat = await Chat.findById(newChat.id).populate({
+        path: 'sender receiver',
+        select: '-password -googleAuthSecret', // Exclude password field
+      });
 
       console.log(populated_chat);
 
-      io.to(roomName).emit('privateMessage', {
+      io.in(roomName.room).emit('privateMessage', {
         chat: populated_chat,
       });
     } catch (error) {
       console.log('error==', error);
+      console.error('Error processing private message:', error);
+      // Send error message back to the client
+      socket.emit('privateMessageError', {
+        error: 'Error processing private message',
+      });
     }
   });
 
