@@ -96,7 +96,7 @@ export class CommentController {
   static getComment = async (req, res) => {
     const { commentId } = req.params;
     try {
-      const comment = await Comment.findById(commentId);
+      const comment = await Comment.findById(commentId).populate('user');
       if (comment) {
         return res.status(200).send({
           success: true,
@@ -121,7 +121,9 @@ export class CommentController {
   static listAllCommentOfPost = async (req, res) => {
     const { postId } = req.params;
     try {
-      const comments = await Comment.find({ post: postId }).populate('post');
+      const comments = await Comment.find({ post: postId }).populate(
+        'user post'
+      );
       return res.status(200).send({
         success: true,
         data: comments,

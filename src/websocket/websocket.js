@@ -55,6 +55,7 @@ io.on('connection', async (socket) => {
   //join the room for private chatting
   socket.on('joinPrivateChatRoom', async (data) => {
     try {
+      const { userId } = JSON.parse(data);
       const roomName = await ChatController.getOrCreateRoomName(
         data.userId,
         socket.user.id
@@ -73,62 +74,53 @@ io.on('connection', async (socket) => {
     // console.log("data", JSON.parse(data));
     // data = JSON.parse(data);
     console.log('data==', data);
-    let { receiver, message } = data;
-    console.log('receiver====', receiver);
-    const roomName = await ChatController.getOrCreateRoomName(
-      data.receiver,
-      socket.user._id
-    );
+    try {
+      let { receiver, message } = JSON.parse(data);
+      console.log('receiver====', receiver);
+      const roomName = await ChatController.getOrCreateRoomName(
+        receiver,
+        socket.user._id
+      );
 
-    // if (
-    //   message_type == "file" ||
-    //   message_type == "image" ||
-    //   message_type == "audio"
-    // ) {
-    //   console.log("Received audio data!");
+      // if (
+      //   message_type == "file" ||
+      //   message_type == "image" ||
+      //   message_type == "audio"
+      // ) {
+      //   console.log("Received audio data!");
 
-    //   try {
-    //     // decode the Base64 string to a buffer
-    //     // console.log("file", data.file);
-    //     const decodedAudio = Buffer.from(data.file, "base64");
-    //     const response = await uploadFromBuffer(decodedAudio, "video");
-    //     console.log("cloudinary res", response);
-    //     cloudinaryRes = response;
-    //     text = response.secure_url;
-    //     console.log(text);
-    //   } catch (error) {
-    //     console.log(error);
-    //     console.log("sorry cant upload file");
-    //   }
+      //   try {
+      //     // decode the Base64 string to a buffer
+      //     // console.log("file", data.file);
+      //     const decodedAudio = Buffer.from(data.file, "base64");
+      //     const response = await uploadFromBuffer(decodedAudio, "video");
+      //     console.log("cloudinary res", response);
+      //     cloudinaryRes = response;
+      //     text = response.secure_url;
+      //     console.log(text);
+      //   } catch (error) {
+      //     console.log(error);
+      //     console.log("sorry cant upload file");
+      //   }
 
-    // }
-    const newChat = await Chat.create({
-      sender: socket.user.id,
-      receiver: receiver,
-      message: message,
-      room: roomName,
-    });
+      // }
+      const newChat = await Chat.create({
+        sender: socket.user.id,
+        receiver: receiver,
+        message: message,
+        room: roomName,
+      });
 
-    const populated_chat = await newChat.populate('receiver sender');
+      const populated_chat = await newChat.populate('receiver sender');
 
-    console.log(populated_chat);
+      console.log(populated_chat);
 
-    // const newprof = await populated_chat.populate(
-    //   "receiver.user sender.user",
-    //   "username profile_pic"
-    // );
-    // console.log(newprof);
-
-    // console.log(newprof);
-    // if (message_type == "audio") {
-    //   io.to([to, socket.userId]).emit("private message", {
-    //     chat: newprof,
-    //     cloudinaryRes: { duration: cloudinaryRes.duration },
-    //   });
-    // }
-    io.to(roomName).emit('privateMessage', {
-      chat: populated_chat,
-    });
+      io.to(roomName).emit('privateMessage', {
+        chat: populated_chat,
+      });
+    } catch (error) {
+      console.log('error==', error);
+    }
   });
 
   socket.on('disconnect', () => {
