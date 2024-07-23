@@ -44,6 +44,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "qrcode": "^1.5.3",
+    "socket.io": "^4.7.5",
     "speakeasy": "^2.0.0",
     "urlsafe-base64": "^1.0.0",
     "uuid": "^9.0.1",

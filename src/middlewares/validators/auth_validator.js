@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import showValidationsError from '../../utils/display_validation_error.js';
 import { OtpType } from '../../constants.js';
+import { avatarUpload } from '../../config/multer_config.js';
 
 export class AuthValidator {
   static pswdPtrn =
@@ -9,9 +10,8 @@ export class AuthValidator {
   static async register(req, res, next) {
     const schema = Joi.object({
       userName: Joi.string().trim().alphanum().min(3).max(50).required(),
-
       email: Joi.string().trim().email().required(),
-
+      avatar: Joi.string(),
       password: Joi.string()
         .trim()
         .pattern(new RegExp(AuthValidator.pswdPtrn))

@@ -1,5 +1,5 @@
-import { Comment } from "../models/comment.js";
-import { Post } from "../models/post.js";
+import { Comment } from '../models/comment.js';
+import { Post } from '../models/post.js';
 
 export class CommentController {
   static createComment = async (req, res) => {
@@ -9,7 +9,7 @@ export class CommentController {
       const post = await Post.findById(postId);
       if (!post) {
         return res.status(404).send({
-          message: "Post not found",
+          message: 'Post not found',
           success: false,
         });
       }
@@ -17,7 +17,7 @@ export class CommentController {
       post.commentCount += 1;
       await post.save();
 
-      await Comment.create({
+      const comment = await Comment.create({
         user: req.user.id,
         post: post.id,
         comment: comment,
@@ -25,12 +25,16 @@ export class CommentController {
 
       return res.status(201).send({
         success: true,
-        message: "Comment created successfully",
+        data: {
+          user: req.user,
+          coment: comment,
+        },
+        message: 'Comment created successfully',
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "Something went wrong",
+        message: 'Something went wrong',
         success: false,
       });
     }
@@ -45,13 +49,13 @@ export class CommentController {
         req.body
       );
       res.status(200).send({
-        message: "Comment Updated Successfully",
+        message: 'Comment Updated Successfully',
         success: true,
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "Something went wrong",
+        message: 'Something went wrong',
         success: false,
       });
     }
@@ -72,18 +76,18 @@ export class CommentController {
         post.commentCount -= 1;
         await post.save();
         return res.status(200).send({
-          message: "Comment Deleted Successfully",
+          message: 'Comment Deleted Successfully',
           success: true,
         });
       } else {
         return res.status(403).send({
-          message: "Comment couldnot be deleted",
+          message: 'Comment couldnot be deleted',
           success: true,
         });
       }
     } catch (error) {
       res.status(500).send({
-        message: "Something went wrong",
+        message: 'Something went wrong',
         success: false,
       });
     }
@@ -96,19 +100,19 @@ export class CommentController {
       if (comment) {
         return res.status(200).send({
           success: true,
-          message: "Comment fetched successfully",
+          message: 'Comment fetched successfully',
           data: comment,
         });
       } else {
         return res.status(404).send({
           success: true,
-          message: "Comment Not Found",
+          message: 'Comment Not Found',
           data: comment,
         });
       }
     } catch (error) {
       res.status(500).send({
-        message: "Something went wrong",
+        message: 'Something went wrong',
         success: false,
       });
     }
@@ -117,15 +121,15 @@ export class CommentController {
   static listAllCommentOfPost = async (req, res) => {
     const { postId } = req.params;
     try {
-      const comments = await Comment.find({ post: postId }).populate("post");
+      const comments = await Comment.find({ post: postId }).populate('post');
       return res.status(200).send({
         success: true,
         data: comments,
-        message: "comment fetched successfully",
+        message: 'comment fetched successfully',
       });
     } catch (error) {
       res.status(500).send({
-        message: "Something went wrong",
+        message: 'Something went wrong',
         success: false,
       });
     }

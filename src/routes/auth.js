@@ -5,10 +5,15 @@ import { authMiddleware } from '../middlewares/auth.js';
 import { userBlockMiddleware } from '../middlewares/userBlockMiddleware.js';
 import { verifyOTP } from '../middlewares/verifyOtp.js';
 import passport from 'passport';
+import { avatarUpload } from '../config/multer_config.js';
 
 const router = express.Router();
 
-router.post('/register', [AuthValidator.register, AuthController.register]);
+router.post('/register', [
+  avatarUpload.single('avatar'),
+  AuthValidator.register,
+  AuthController.register,
+]);
 router.post('/verify-user-email', [
   AuthValidator.verifyOtp,
   AuthController.vefifyOtp,

@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
 import { User } from './src/models/user.js';
 import bodyParser from 'body-parser';
+import { io } from './src/websocket/websocket.js';
+
 import {
   auth,
   user,
@@ -127,6 +129,8 @@ app.use(
 );
 await new Promise((resolve) => httpServer.listen({ port: 8000 }, resolve));
 console.log(`🚀 Server ready at http://localhost:8000${server.graphqlPath}`);
+
+io.listen(httpServer);
 
 // (async function () {
 //   // Establish connectivity

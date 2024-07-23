@@ -35,6 +35,9 @@ export class AuthController {
         errors.email = 'User with email address already exists';
         return res.status(400).send({ errors });
       }
+      if (req.file) {
+        req.body.avatar = req.file.filename;
+      }
       const user = await User.create(req.body);
       const { token: emailToken } = await generateToken(
         user,

@@ -73,3 +73,47 @@ const customAuthMiddleware = async (req) => {
 };
 
 export default customAuthMiddleware;
+
+export const websockAuthMiddleware = async (socket, next) => {
+  try {
+    console.log('Custom auth middleware called');
+
+    // Check if Authorization header exists and has correct format
+    if (
+      !socket.handshake.headers.authorization ||
+      !socket.handshake.headers.authorization.startsWith('Bearer ')
+    ) {
+      throw new Error('User is not authenticated');
+    }
+
+    // Extract token from Authorization header
+    const token = socket.handshake.headers.authorization.split(' ')[1];
+
+    // Verify JWT
+    const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+
+    // Fetch user based on decoded token
+    const user = await User.findById(decodedToken.data.id);
+    socket.user = user;
+    next();
+
+    if (!user) {
+      next(new Error('User not found'));
+    }
+
+    // Attach authenticated user to context
+    return user;
+  } catch (error) {
+    console.error('Authentication error:', error);
+
+    // Handle different types of errors
+    if (error.name === 'JsonWebTokenError') {
+      next(new Error('Invalid token'));
+    } else if (error.name === 'TokenExpiredError') {
+      next(new Error('Token expired'));
+    } else {
+      // Generic error handling
+      next(new Error('Authentication failed'));
+    }
+  }
+};
