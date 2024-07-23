@@ -6,6 +6,7 @@ import { ChatValidator } from '../middlewares/validators/chat.js';
 const router = express.Router();
 router.use(authMiddleware);
 
+router.get('/list-user-to-chat', ChatController.listUserToChat);
 router.post('/private/:receiverId', [
   ChatValidator.createChat,
   ChatController.createPrivateMessage,

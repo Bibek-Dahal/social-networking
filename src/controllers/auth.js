@@ -160,6 +160,7 @@ export class AuthController {
   };
 
   static login = async (req, res) => {
+    console.log('login route called');
     const { email, password } = req.body;
     try {
       const user = await User.findOne({ email: email });
