@@ -17,13 +17,13 @@ export class CommentController {
       post.commentCount += 1;
       await post.save();
 
-      const comment = await Comment.create({
+      const commentObj = await Comment.create({
         user: req.user.id,
         post: post.id,
         comment: comment,
       });
 
-      const populatedComment = comment.populate({
+      const populatedComment = await Comment.findById(commentObj.id).populate({
         path: 'user',
         select: '-password', // Exclude password field
       });

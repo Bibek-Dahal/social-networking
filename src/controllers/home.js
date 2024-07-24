@@ -1,5 +1,5 @@
-import { Post } from "../models/post.js";
-import { Subscription } from "../models/subscription.js";
+import { Post } from '../models/post.js';
+import { Subscription } from '../models/subscription.js';
 export class HomeController {
   static homeFeed = async (req, res) => {
     try {
@@ -15,14 +15,42 @@ export class HomeController {
       const userFollowingFilter = subscribedUsers.filter((item) => {
         return !item.isExpired && userFollowings.includes(item.subscribeTo);
       });
-      console.log("userFollowingFilter==", userFollowingFilter);
+      console.log('userFollowingFilter==', userFollowingFilter);
       // console.log("subscribed user====", subscribedUsers);
+
+      const lookupPosts = await Post.aggregate([
+        {
+          $match: {},
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $addFields: {
+            user: { $arrayElemAt: ['$user', 0] }, // Take the first (and only) element from popuser array
+          },
+        },
+        {
+          $project: {
+            'user.password': 0,
+            // Exclude the password field from popuser
+            // Add other fields to project if needed
+          },
+        },
+      ]);
+
+      console.log('lookupPosts====', lookupPosts);
       const posts = await Post.find({ user: { $in: userFollowingFilter } })
         .populate(
           {
-            path: "user",
-            select: "userName email profile",
-            populate: { path: "profile", select: "avatar bio " },
+            path: 'user',
+            select: 'userName email profile',
+            populate: { path: 'profile', select: 'avatar bio ' },
           }
           // "user",
           // "userName email profile"
@@ -36,12 +64,12 @@ export class HomeController {
       return res.status(200).send({
         data: posts,
         success: true,
-        message: "Post fetched successfully",
+        message: 'Post fetched successfully',
       });
     } catch (error) {
       console.log(error);
       return res.status(500).send({
-        message: "Something went wrong",
+        message: 'Something went wrong',
         success: false,
       });
     }
