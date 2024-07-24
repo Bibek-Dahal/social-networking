@@ -1,5 +1,6 @@
 import { Post } from '../models/post.js';
 import { Subscription } from '../models/subscription.js';
+import mongoose from 'mongoose';
 export class HomeController {
   static homeFeed = async (req, res) => {
     try {
@@ -20,7 +21,9 @@ export class HomeController {
 
       const lookupPosts = await Post.aggregate([
         {
-          $match: {},
+          $match: {
+            user: { $in: userFollowings },
+          },
         },
         {
           $lookup: {
@@ -32,37 +35,61 @@ export class HomeController {
         },
         {
           $addFields: {
-            user: { $arrayElemAt: ['$user', 0] }, // Take the first (and only) element from popuser array
+            user: { $arrayElemAt: ['$user', 0] }, // Take the first (and only) element from user array
+          },
+        },
+        {
+          $lookup: {
+            from: 'likes',
+            let: { postId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] }, // Match likes for the current post
+                      { $eq: ['$user', req.user._id] }, // Match likes by the current user
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'likes',
+          },
+        },
+        {
+          $addFields: {
+            likedByCurrentUser: { $gt: [{ $size: '$likes' }, 0] }, // Check if there are any likes (user has liked)
           },
         },
         {
           $project: {
             'user.password': 0,
-            // Exclude the password field from popuser
+            likes: 0, // Exclude likes array from the final output if not needed
             // Add other fields to project if needed
           },
         },
       ]);
 
-      console.log('lookupPosts====', lookupPosts);
-      const posts = await Post.find({ user: { $in: userFollowingFilter } })
-        .populate(
-          {
-            path: 'user',
-            select: 'userName email profile',
-            populate: { path: 'profile', select: 'avatar bio ' },
-          }
-          // "user",
-          // "userName email profile"
-        )
-        .limit(2);
+      // console.log('lookupPosts====', lookupPosts);
+      // const posts = await Post.find({ user: { $in: userFollowingFilter } })
+      //   .populate(
+      //     {
+      //       path: 'user',
+      //       select: 'userName email profile',
+      //       populate: { path: 'profile', select: 'avatar bio ' },
+      //     }
+      //     // "user",
+      //     // "userName email profile"
+      //   )
+      //   .limit(2);
       // .populate({
       //   path: "comments",
       //   select: "user",
       //   populate: { path: "user", select: "email userName" },
       // });
       return res.status(200).send({
-        data: posts,
+        data: lookupPosts,
         success: true,
         message: 'Post fetched successfully',
       });
