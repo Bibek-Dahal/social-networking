@@ -187,7 +187,7 @@ export class AuthController {
           user: user.id,
           isUsed: false,
           otp: otp,
-          otpType: OtpType.Register,
+          otpType: OtpType.ResendRegisterOtp,
         });
         sendMail({
           user,
@@ -196,6 +196,7 @@ export class AuthController {
         });
         return res.status(400).send({
           code: 'not-verified',
+          userId: user.id,
           message:
             'E-mail not verified. We have sent you verification email. Please verify your email address.',
           success: false,
