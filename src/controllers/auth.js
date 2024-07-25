@@ -246,6 +246,7 @@ export class AuthController {
           id: user._id,
           userName: user.userName,
           email: user.email,
+          role: user.role,
         },
         message: 'User login successfull.',
         success: true,
