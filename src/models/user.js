@@ -100,7 +100,7 @@ userSchema.methods.generateJwtTokens = function () {
             email: this.email,
           },
         },
-        process.env.JWT_SECRET
+        process.env.JWT_REFRESH_SECRET
       );
       resolve({ accessToken, refreshToken, uuid });
     } catch (error) {

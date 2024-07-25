@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const verifyJwtToken = function (token) {
   const promise = new Promise((resolve, reject) => {
     try {
-      const jwtToken = jwt.verify(token, process.env.JWT_SECRET);
+      const jwtToken = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
       if (jwtToken) {
         resolve(jwtToken);
       } else {
