@@ -5,7 +5,7 @@ const avatarStorage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    cb(null, uniqueSuffix + '.' + file.originalname.split('.')[1]);
   },
 });
 
@@ -16,8 +16,9 @@ const postStorage = multer.diskStorage({
     cb(null, 'src/public/uploads/');
   },
   filename: function (req, file, cb) {
+    console.log('filename============', file.originalname);
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    cb(null, uniqueSuffix + '.' + file.originalname.split('.')[1]);
   },
 });
 
