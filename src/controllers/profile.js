@@ -61,10 +61,12 @@ export class ProfileController {
   };
 
   static getProfileById = async (req, res) => {
+    console.log(req.params);
     const { profileId } = req.params;
+    console.log('profiled===', profileId);
     try {
       const profile = await Profile.findById(profileId);
-      let profileToSend = profile.toObject();
+
       if (!profile) {
         return res.status(404).send(new ErrorApiResponse('Profile not found'));
       }
@@ -72,16 +74,17 @@ export class ProfileController {
       if (!profile.showPhoneNumber) {
         console.log('inside if');
 
-        delete profileToSend.phoneNumber;
+        delete profile.phoneNumber;
       }
 
       return res.status(200).send(
         new SuccessApiResponse({
-          data: profileToSend,
+          data: profile,
           message: 'Profile fetched.',
         })
       );
     } catch (error) {
+      console.log(error);
       res.status(500).send(new ErrorApiResponse());
     }
   };
