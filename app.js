@@ -62,7 +62,7 @@ app.use('/api/like', like);
 app.use('/api/event', event);
 app.use('/api/chat', chat);
 app.use('/api/test', test);
-app.use('/static', express.static('./src/public'));
+app.use('/api/static', express.static('./src/public'));
 
 app.use('/api/admin/users', adminUser);
 app.use('/api/admin/posts', adminPost);
