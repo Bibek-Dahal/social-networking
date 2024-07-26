@@ -65,7 +65,10 @@ export class ProfileController {
     const { profileId } = req.params;
     console.log('profiled===', profileId);
     try {
-      const profile = await Profile.findById(profileId);
+      const profile = await Profile.findById(profileId).populate({
+        path: 'user',
+        select: { password: 0, googleAuthSecret: 0 },
+      });
 
       if (!profile) {
         return res.status(404).send(new ErrorApiResponse('Profile not found'));
