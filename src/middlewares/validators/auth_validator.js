@@ -80,7 +80,7 @@ export class AuthValidator {
   static passwordResetConfirm = async (req, res, next) => {
     const schema = Joi.object({
       oId: Joi.string().required(),
-      userId: Joi.string().required(),
+      token: Joi.string().required(),
       newPassword1: Joi.string()
         .pattern(new RegExp(AuthValidator.pswdPtrn))
         .required()

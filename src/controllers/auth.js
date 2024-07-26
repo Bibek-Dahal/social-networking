@@ -118,7 +118,11 @@ export class AuthController {
       });
       console.log('otpModel==', otpModel);
       const user = await User.findById(userId);
-      if (user && user.isEmailVerified) {
+      if (
+        otpType == (otpType.Register || otpType.ResendRegisterOtp) &&
+        user &&
+        user.isEmailVerified
+      ) {
         return res.status(200).send(
           new SuccessApiResponse({
             message: 'Email already verified',
@@ -466,42 +470,56 @@ export class AuthController {
   };
 
   static passwordResetConfirm = async (req, res) => {
-    const { userId, oid, newPassword1, newPassword2 } = req.body;
+    const { token, oId, newPassword1, newPassword2 } = req.body;
     let decodedToken;
+    console.log('Oid===', oId);
 
     try {
       try {
-        const decodedToken = await jwt.verify(userId, process.env.JWT_SECRET);
+        decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+        // console.log(decodedToken);
       } catch (error) {
         return res.status(400).send(new ErrorApiResponse('Token Expired'));
       }
       const user = await User.findById(decodedToken.data.id);
-      const otpObj = await OTPmodel.findOne({ uuid: oid });
+      const otpObj = await OTPmodel.findById(oId);
+      const emailToken = await EmailToken.findOne({
+        uuid: decodedToken.data.uuid,
+      });
       if (!user) {
         return res.status(404).send(new ErrorApiResponse('User not found'));
       }
 
-      if (!otpObj) {
+      if (!otpObj || !emailToken) {
         return res
           .status(400)
           .send(new ErrorApiResponse('Password reset link expired'));
       }
 
-      if (otpObj.isUsed == true && otpObj.user == user.id) {
+      if (!otpObj.isUsed) {
+        return res.status(400).send(new ErrorApiResponse('Otp not verified'));
+      }
+
+      if (
+        otpObj.user == user.id &&
+        emailToken.user == user.id &&
+        otpObj.otpType ==
+          (OtpType.PasswordResetOtp || OtpType.ResendPasswordResetOtp)
+      ) {
+        user.password = newPassword1;
+        await user.save();
+        await EmailToken.findOneAndDelete({ uuid: decodedToken.data.uuid });
+
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Password reset successfull',
+          })
+        );
       } else {
         return res
           .status(400)
           .send(new ErrorApiResponse('Cant reset password'));
       }
-
-      user.password = newPassword1;
-      await user.save();
-
-      return res.status(200).send(
-        new SuccessApiResponse({
-          message: 'Password reset successfull',
-        })
-      );
     } catch (error) {
       console.log(error);
       res.status(500).send(new ErrorApiResponse());

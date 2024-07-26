@@ -62,21 +62,11 @@ app.use('/api/like', like);
 app.use('/api/event', event);
 app.use('/api/chat', chat);
 app.use('/api/test', test);
+app.use('/static', express.static('./src/public'));
 
 app.use('/api/admin/users', adminUser);
 app.use('/api/admin/posts', adminPost);
 app.use('/api/admin/subscriptions', subscription);
-
-// Middleware to modify response before sending
-app.use((req, res, next) => {
-  const originalSend = res.send;
-  res.send = function (body) {
-    body = `Modified Response: ${body}`;
-    console.log('res middleware called');
-    originalSend.call(this, body);
-  };
-  next();
-});
 
 app.get('/', async (req, res) => {
   res.status(200).send({ data: 'Hello World' });
