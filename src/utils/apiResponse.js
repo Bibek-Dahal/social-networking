@@ -9,9 +9,13 @@ export class SuccessApiResponse {
 
 export class ErrorApiResponse {
   success;
-  errors = {};
+  errors;
+
   constructor(message = 'Something went wrong') {
-    this.errors.message = message;
     this.success = false;
+    this.errors = {};
+
+    // Ensure `errors.message` is always an array
+    this.errors.message = Array.isArray(message) ? message : [message];
   }
 }

@@ -416,6 +416,7 @@ export class AuthController {
   };
 
   static passwordReset = async (req, res) => {
+    console.log('pwd reset email sent');
     try {
       const user = await User.findOne({ email: req.body.email });
       if (!user) {
@@ -436,7 +437,7 @@ export class AuthController {
         uuid: uuid,
       });
 
-      OTPmodel.create({
+      const otpObj = await OTPmodel.create({
         user: user.id,
         isUsed: false,
         otp: otp,
@@ -452,6 +453,8 @@ export class AuthController {
         new SuccessApiResponse({
           data: {
             userId: user.id,
+            token: token,
+            oid: otpObj.id,
           },
           message: 'Password reset email sent',
         })
@@ -463,16 +466,32 @@ export class AuthController {
   };
 
   static passwordResetConfirm = async (req, res) => {
-    const { userId, newPassword1, newPassword2 } = req.body;
-    try {
-      const user = await User.findById(userId);
+    const { userId, oid, newPassword1, newPassword2 } = req.body;
+    let decodedToken;
 
+    try {
+      try {
+        const decodedToken = await jwt.verify(userId, process.env.JWT_SECRET);
+      } catch (error) {
+        return res.status(400).send(new ErrorApiResponse('Token Expired'));
+      }
+      const user = await User.findById(decodedToken.data.id);
+      const otpObj = await OTPmodel.findOne({ uuid: oid });
       if (!user) {
-        return res.status(404).send(
-          new SuccessApiResponse({
-            message: 'User not found',
-          })
-        );
+        return res.status(404).send(new ErrorApiResponse('User not found'));
+      }
+
+      if (!otpObj) {
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Password reset link expired'));
+      }
+
+      if (otpObj.isUsed == true && otpObj.user == user.id) {
+      } else {
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Cant reset password'));
       }
 
       user.password = newPassword1;
