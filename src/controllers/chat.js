@@ -1,7 +1,7 @@
-import { serverError } from '../constants.js';
 import { Chat } from '../models/chat.js';
 import { Room } from '../models/room.js';
 import { User } from '../models/user.js';
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 
 export class ChatController {
   static getOrCreateRoomName = async (senderId, reveiverId) => {
@@ -29,10 +29,7 @@ export class ChatController {
     try {
       const user = await User.findById(receiverId);
       if (!user) {
-        return res.status(404).send({
-          message: 'User not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
       const room = await ChatController.getOrCreateRoomName(
         req.user.id,
@@ -40,10 +37,9 @@ export class ChatController {
       );
 
       if (receiverId == req.user.id) {
-        return res.status(400).send({
-          success: false,
-          message: 'Reveiver and sender id cant be same',
-        });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Reveiver and sender id cant be same'));
       }
       const chatMsg = await Chat.create({
         sender: req.user.id,
@@ -51,14 +47,15 @@ export class ChatController {
         message: req.body.message,
         room: room.room,
       });
-      return res.status(201).send({
-        message: 'Chat created successfully',
-        success: true,
-        data: chatMsg,
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          message: 'Chat created successfully',
+          data: chatMsg,
+        })
+      );
     } catch (error) {
       console.log(error);
-      return res.status(500).send(serverError);
+      return res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -81,14 +78,15 @@ export class ChatController {
 
       const lastMessages = await Promise.all(lastMessagesPromises);
 
-      return res.status(200).send({
-        success: true,
-        message: 'Last msg fetched',
-        data: lastMessages,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Ok',
+          data: lastMessages,
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -97,16 +95,10 @@ export class ChatController {
     try {
       const user = await User.findById(userId);
       if (req.user.id == userId) {
-        return res.status(400).send({
-          messages: 'Cant user own id',
-          success: false,
-        });
+        return res.status(400).send(new ErrorApiResponse('Cant user own id'));
       }
       if (!user) {
-        return res.status(404).send({
-          message: 'User not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
       const room = await ChatController.getOrCreateRoomName(
         req.user.id,
@@ -140,14 +132,15 @@ export class ChatController {
       );
       console.log('updatedData==', updatedData);
       const messages = await Chat.find({ room: room.room });
-      return res.status(200).send({
-        message: 'Messages fetched successfully',
-        success: true,
-        data: messages,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Messages fetched successfully',
+          data: messages,
+        })
+      );
     } catch (error) {
       console.log('error==', error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -157,14 +150,15 @@ export class ChatController {
         { _id: { $nin: req.user.id } },
         { password: 0 }
       ).populate('profile');
-      return res.status(200).send({
-        data: users,
-        message: 'User fetched successfully',
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: users,
+          message: 'User fetched successfully',
+        })
+      );
     } catch (err) {
       console.log(err);
-      return res.status(500).send(serverError);
+      return res.status(500).send(new ErrorApiResponse());
     }
   };
 }

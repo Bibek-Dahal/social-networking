@@ -1,6 +1,7 @@
 import { Post } from '../models/post.js';
 import { Subscription } from '../models/subscription.js';
 import mongoose from 'mongoose';
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 export class HomeController {
   static homeFeed = async (req, res) => {
     try {
@@ -88,17 +89,15 @@ export class HomeController {
       //   select: "user",
       //   populate: { path: "user", select: "email userName" },
       // });
-      return res.status(200).send({
-        data: lookupPosts,
-        success: true,
-        message: 'Post fetched successfully',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: lookupPosts,
+          message: 'Post fetched successfully',
+        })
+      );
     } catch (error) {
       console.log(error);
-      return res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      return res.status(500).send(new ErrorApiResponse());
     }
   };
 }

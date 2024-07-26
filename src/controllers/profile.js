@@ -1,4 +1,5 @@
 import { Profile } from '../models/profile.js';
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 export class ProfileController {
   static updateProfle = async (req, res) => {
     try {
@@ -15,10 +16,11 @@ export class ProfileController {
           ],
         });
         if (userWithPhnExists) {
-          return res.status(400).send({
-            message: 'User with phone number already exists',
-            success: false,
-          });
+          return res
+            .status(400)
+            .send(
+              new ErrorApiResponse('User with phone number already exists')
+            );
         }
       }
 
@@ -28,16 +30,15 @@ export class ProfileController {
         // req.body,
         { new: true }
       );
-      return res.status(200).send({
-        message: 'Profile updated successfully',
-        success: true,
-        data: profile,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Profile updated successfully',
+
+          data: profile,
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -45,22 +46,17 @@ export class ProfileController {
     try {
       const profile = await Profile.findOne({ user: req.user.id });
       if (profile) {
-        return res.status(200).send({
-          success: true,
-          message: 'Profile fetched successfully',
-          data: profile,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Profile fetched successfully',
+            data: profile,
+          })
+        );
       } else {
-        return res.status(404).send({
-          success: false,
-          message: 'Profile not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('Profile not found'));
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -70,10 +66,7 @@ export class ProfileController {
       const profile = await Profile.findById(profileId);
       let profileToSend = profile.toObject();
       if (!profile) {
-        return res.status(404).send({
-          success: false,
-          message: 'Profile not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('Profile not found'));
       }
       console.log('show phone number', profile.showPhoneNumber);
       if (!profile.showPhoneNumber) {
@@ -82,16 +75,14 @@ export class ProfileController {
         delete profileToSend.phoneNumber;
       }
 
-      return res.status(200).send({
-        success: true,
-        data: profileToSend,
-        message: 'Profile fetched.',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: profileToSend,
+          message: 'Profile fetched.',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 }

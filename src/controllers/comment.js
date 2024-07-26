@@ -1,5 +1,6 @@
 import { Comment } from '../models/comment.js';
 import { Post } from '../models/post.js';
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 
 export class CommentController {
   static createComment = async (req, res) => {
@@ -8,10 +9,7 @@ export class CommentController {
     try {
       const post = await Post.findById(postId);
       if (!post) {
-        return res.status(404).send({
-          message: 'Post not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('Post not found'));
       }
 
       post.commentCount += 1;
@@ -28,19 +26,17 @@ export class CommentController {
         select: '-password', // Exclude password field
       });
 
-      return res.status(201).send({
-        success: true,
-        data: {
-          coment: populatedComment,
-        },
-        message: 'Comment created successfully',
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          data: {
+            coment: populatedComment,
+          },
+          message: 'Comment created successfully',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -52,16 +48,14 @@ export class CommentController {
         { _id: commentId, user: req.user.id },
         req.body
       );
-      res.status(200).send({
-        message: 'Comment Updated Successfully',
-        success: true,
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Comment Updated Successfully',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -79,21 +73,18 @@ export class CommentController {
 
         post.commentCount -= 1;
         await post.save();
-        return res.status(200).send({
-          message: 'Comment Deleted Successfully',
-          success: true,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Comment Deleted Successfully',
+          })
+        );
       } else {
-        return res.status(403).send({
-          message: 'Comment couldnot be deleted',
-          success: true,
-        });
+        return res
+          .status(403)
+          .send(new ErrorApiResponse('Comment couldnot be deleted'));
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -105,23 +96,17 @@ export class CommentController {
         select: '-password', // Exclude password field
       });
       if (comment) {
-        return res.status(200).send({
-          success: true,
-          message: 'Comment fetched successfully',
-          data: comment,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Comment fetched successfully',
+            data: comment,
+          })
+        );
       } else {
-        return res.status(404).send({
-          success: true,
-          message: 'Comment Not Found',
-          data: comment,
-        });
+        return res.status(404).send(new ErrorApiResponse('Comment Not Found'));
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -134,16 +119,14 @@ export class CommentController {
           select: '-password', // Exclude password field
         })
         .populate('post');
-      return res.status(200).send({
-        success: true,
-        data: comments,
-        message: 'comment fetched successfully',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: comments,
+          message: 'comment fetched successfully',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 }

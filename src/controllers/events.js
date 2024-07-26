@@ -2,6 +2,7 @@ import { Event } from '../models/events.js';
 import { serverError } from '../constants.js';
 import moment from 'moment-timezone';
 import mt from 'moment';
+import { ErrorApiResponse, SuccessApiResponse } from '../utils/apiResponse.js';
 import { sendPriorNotification } from '../utils/cron-job.js';
 export class EventController {
   static createEvent = async (req, res) => {
@@ -13,21 +14,23 @@ export class EventController {
       req.body.endDate = moment.tz(req.body.endDate, req.body.timeZone).utc();
 
       if (req.body.endDate.diff(req.body.startDate) <= 0) {
-        return res.status(400).send({
-          success: false,
-          message: 'Start date cant be greater than end date',
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse('Start date cant be greater than end date')
+          );
       }
       const data = await Event.create(req.body);
       sendPriorNotification(req.body.startDate);
 
-      return res.status(201).send({
-        message: 'Event created successfully',
-        success: true,
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          message: 'Event created successfully',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -36,16 +39,12 @@ export class EventController {
     try {
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).send({
-          message: 'Event not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('Event not found'));
       }
       if (!event.user == req.user.id) {
-        return res.status(403).send({
-          message: 'You cant perfom this action',
-          success: false,
-        });
+        return res
+          .status(403)
+          .send(new ErrorApiResponse('You cant perfom this action'));
       }
 
       if (req.body.participents) {
@@ -69,20 +68,22 @@ export class EventController {
       console.log('momentStd---', momentStartDate);
 
       if (req.body.endDate && req.body.endDate.diff(momentStartDate) <= 0) {
-        return res.status(400).send({
-          success: false,
-          message: 'Start date cant be greater than end date',
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse('Start date cant be greater than end date')
+          );
       }
       await event.updateOne(req.body);
 
-      return res.status(200).send({
-        message: 'Event updated successfully',
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Event updated successfully',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -99,12 +100,14 @@ export class EventController {
         select: 'userName profile',
         populate: 'profile',
       });
-      res.status(200).send({
-        message: 'event fetched succesfully',
-        data: data,
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          message: 'event fetched succesfully',
+          data: data,
+        })
+      );
     } catch (error) {
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -116,17 +119,15 @@ export class EventController {
         user: req.user.id,
       });
       if (!deletedEvent) {
-        return res.status(404).send({
-          message: 'Event not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('Event not found'));
       }
-      return res.status(200).send({
-        message: 'Event deleted successfully',
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Event deleted successfully',
+        })
+      );
     } catch (error) {
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 }

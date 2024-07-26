@@ -1,16 +1,15 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const postSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     title: {
       type: String,
-      required: true,
       trim: true,
     },
     description: {
@@ -37,11 +36,11 @@ const postSchema = new Schema(
   }
 );
 
-postSchema.virtual("comments", {
-  ref: "Comment",
-  localField: "_id",
-  foreignField: "post",
+postSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'post',
 });
 
-const Post = mongoose.model("Post", postSchema);
+const Post = mongoose.model('Post', postSchema);
 export { Post };

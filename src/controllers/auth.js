@@ -14,6 +14,7 @@ import 'dotenv/config';
 import { OTPmodel } from '../models/otpModel.js';
 import { OtpType } from '../constants.js';
 import { generateOTP } from '../utils/generateOtp.js';
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 
 export class AuthController {
   static register = async (req, res) => {
@@ -25,15 +26,15 @@ export class AuthController {
         email: req.body.email,
       });
       if (userWithUserName) {
-        let errors = {};
-        errors.email = 'User with username already exists';
-        return res.status(400).send({ errors });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('User with username already exists'));
       }
 
       if (userWithEmail) {
-        let errors = {};
-        errors.email = 'User with email address already exists';
-        return res.status(400).send({ errors });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('User with email address already exists'));
       }
       if (req.file) {
         req.body.avatar = req.file.filename;
@@ -58,21 +59,17 @@ export class AuthController {
         otpType: OtpType.Register,
       });
 
-      return res.status(201).send({
-        message: 'User registration successfull',
-        success: true,
-        data: {
-          userId: user.id,
-        },
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          message: 'User registration successfull',
+          data: {
+            userId: user.id,
+          },
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        errors: {
-          message: 'Something went wrong',
-          success: false,
-        },
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -81,10 +78,7 @@ export class AuthController {
     try {
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).send({
-          success: false,
-          message: 'User not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
 
       const otp = generateOTP();
@@ -101,15 +95,16 @@ export class AuthController {
         otpType: otpType,
       });
 
-      return res.status(201).send({
-        message: 'Otp send successfully',
-        success: true,
-        data: {
-          userId: user.id,
-        },
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          message: 'Otp send successfully',
+          data: {
+            userId: user.id,
+          },
+        })
+      );
     } catch (error) {
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -124,17 +119,15 @@ export class AuthController {
       console.log('otpModel==', otpModel);
       const user = await User.findById(userId);
       if (user && user.isEmailVerified) {
-        return res.status(200).send({
-          message: 'Email already verified',
-          success: true,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Email already verified',
+          })
+        );
       }
 
       if (!user) {
-        return res.status(404).send({
-          message: 'User not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
 
       if (otpModel && otpModel.isUsed == false) {
@@ -147,18 +140,19 @@ export class AuthController {
         }
         otpModel.isUsed = true;
         otpModel.save();
-        return res.status(200).send({
-          message: 'Otp verification successfull',
-          success: true,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Otp verification successfull',
+            data: { otpId: otpModel.id },
+          })
+        );
       } else {
-        return res.status(400).send({
-          message: 'Otp couldnot be verified',
-          success: true,
-        });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Otp couldnot be verified'));
       }
     } catch (error) {
-      return res.status(500).send(serverError);
+      return res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -168,10 +162,13 @@ export class AuthController {
     try {
       const user = await User.findOne({ email: email });
       if (!user) {
-        return res.status(400).send({
-          message: 'The provided credential do not match our record',
-          success: false,
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse(
+              'The provided credential do not match our record'
+            )
+          );
       }
       console.log('outside email not verifed');
       if (!user.isEmailVerified) {
@@ -204,19 +201,24 @@ export class AuthController {
       }
 
       if (user.blockUser) {
-        return res.status(400).send({
-          message:
-            'We are sorry to notify you that you are restricted to access this site. Please contact support for further information.',
-          success: false,
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse(
+              'We are sorry to notify you that you are restricted to access this site. Please contact support for further information.'
+            )
+          );
       }
 
       const result = await User.comparePassword(password, user.password);
       if (!result) {
-        return res.status(400).send({
-          message: 'The provided credential do not match our record',
-          success: false,
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse(
+              'The provided credential do not match our record'
+            )
+          );
       }
 
       if (user.mfaEnabled) {
@@ -225,10 +227,12 @@ export class AuthController {
           secretKey: process.env.AES_SECRET_KEY,
         });
         console.log('encrypted-data', encryptedUserId);
-        return res.status(209).send({
-          success: true,
-          userId: `${encryptedUserId}`,
-        });
+        return res.status(209).send(
+          new SuccessApiResponse({
+            message: '',
+            data: `${encryptedUserId}`,
+          })
+        );
         // return res.redirect(
         //   `http://localhost:8000/verify-otp?id=${encryptedUserId}`
         // );
@@ -240,24 +244,20 @@ export class AuthController {
         uuid: tokens.uuid,
       });
 
-      res.status(200).send({
-        ...tokens,
-        data: {
-          id: user._id,
-          userName: user.userName,
-          email: user.email,
-          role: user.role,
-        },
-        message: 'User login successfull.',
-        success: true,
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          data: {
+            ...tokens,
+            id: user._id,
+            userName: user.userName,
+            email: user.email,
+            role: user.role,
+          },
+          message: 'User login successfull.',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        errors: {
-          message: 'Something went wrong',
-          success: false,
-        },
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -270,18 +270,17 @@ export class AuthController {
       console.log('jwt-token==', jwtToken);
 
       if (!jwtToken) {
-        return res.status(400).send({
-          message: 'Token expired',
-          success: false,
-        });
+        return res.status(400).send(new ErrorApiResponse('Token expired'));
       }
       const token = await Jwt.findOne({ uuid: jwtToken.data.uuid });
       if (!token) {
-        return res.status(404).send({
-          message:
-            'Cant login with given token. Either token is expired or doesnot exists',
-          success: false,
-        });
+        return res
+          .status(404)
+          .send(
+            new ErrorApiResponse(
+              'Cant login with given token. Either token is expired or doesnot exists'
+            )
+          );
       }
 
       const newAccessToken = await generateAccessToken({
@@ -289,19 +288,17 @@ export class AuthController {
         userName: jwtToken.data.userName,
         email: jwtToken.data.email,
       });
-      return res.status(200).send({
-        message: 'Access token generated successfully',
-        success: true,
-        data: {
-          accessToken: newAccessToken,
-        },
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Access token generated successfully',
+          data: {
+            accessToken: newAccessToken,
+          },
+        })
+      );
     } catch (error) {
       console.log('error', error);
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -312,25 +309,20 @@ export class AuthController {
       const jwtToken = await verifyJwtToken(refreshToken);
 
       if (!jwtToken) {
-        return res.status(400).send({
-          message: 'Token expired',
-          success: false,
-        });
+        return res.status(400).send(new ErrorApiResponse('Token expired'));
       }
 
       const token = await Jwt.findOneAndDelete({ uuid: jwtToken.data.uuid });
 
       // token.isBlackListed = true;
       // await token.save();
-      return res.status(200).send({
-        message: 'User log out successfull',
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'User log out successfull',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -340,16 +332,14 @@ export class AuthController {
         user: req.user.id,
       });
 
-      return res.status(200).send({
-        message: 'Logged out from all devices',
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Logged out from all devices',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -369,10 +359,13 @@ export class AuthController {
       );
       console.log('passwordMatch===', passwordMatch);
       if (!passwordMatch) {
-        return res.status(400).send({
-          success: false,
-          message: 'Provided password do not match current password',
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse(
+              'Provided password do not match current password'
+            )
+          );
       }
 
       currentUser.password = newPassword1;
@@ -384,16 +377,14 @@ export class AuthController {
         });
       }
 
-      return res.status(200).send({
-        success: true,
-        message: 'Password change successfull',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Password change successfull',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -413,16 +404,14 @@ export class AuthController {
         //   success: true,
         // });
       }
-      return res.status(400).send({
-        message: 'Invalid token',
-        success: false,
-      });
+      return res.status(400).send(
+        new ErrorApiResponse({
+          message: 'Invalid token',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -459,19 +448,17 @@ export class AuthController {
         subject: 'Password Reset Email',
         token: otp,
       });
-      return res.status(200).send({
-        data: {
-          userId: user.id,
-        },
-        message: 'Password reset email sent',
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: {
+            userId: user.id,
+          },
+          message: 'Password reset email sent',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -481,25 +468,24 @@ export class AuthController {
       const user = await User.findById(userId);
 
       if (!user) {
-        return res.status(404).send({
-          success: false,
-          message: 'User not found',
-        });
+        return res.status(404).send(
+          new SuccessApiResponse({
+            message: 'User not found',
+          })
+        );
       }
 
       user.password = newPassword1;
       await user.save();
 
-      return res.status(200).send({
-        success: true,
-        message: 'Password reset successfull',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Password reset successfull',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -517,10 +503,7 @@ export class AuthController {
       console.log('decrypted-data===', decryptedUserId);
       const user = await User.findById(decryptedUserId);
       if (!user) {
-        return res.status(404).send({
-          success: false,
-          message: 'User not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
 
       const result = verifyOTP(user.googleAuthSecret, otp);
@@ -533,24 +516,22 @@ export class AuthController {
           uuid: tokens.uuid,
         });
 
-        return res.status(200).send({
-          ...tokens,
-          data: {
-            id: user._id,
-            userName: user.userName,
-            email: user.email,
-          },
-          message: 'User login successfull.',
-          success: true,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            data: {
+              ...tokens,
+              id: user._id,
+              userName: user.userName,
+              email: user.email,
+            },
+            message: 'User login successfull.',
+          })
+        );
       }
-      return res.status(400).send({
-        success: false,
-        message: 'Otp not verified',
-      });
+      return res.status(400).send(new ErrorApiResponse('Otp not verified'));
     } catch (error) {
       console.log(error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 }

@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import { Post } from '../models/post.js';
 import { eventEmitter } from '../utils/eventHandler.js';
 import { Schema } from 'mongoose';
+
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
+
 export class PostController {
   static createPost = async (req, res) => {
     try {
@@ -12,17 +15,15 @@ export class PostController {
       }
       const post = await Post.create(data);
       eventEmitter.emit('increasePostCount', req.user);
-      return res.status(201).send({
-        message: 'Post created successfully',
-        success: true,
-        data: post,
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          message: 'Post created successfully',
+          data: post,
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -39,16 +40,14 @@ export class PostController {
         { $set: req.body },
         { new: true }
       );
-      return res.status(200).send({
-        message: 'Post updated successfully',
-        success: true,
-        data: post,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Post updated successfully',
+          data: post,
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'Something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -60,22 +59,17 @@ export class PostController {
         user: req.user.id,
       });
       if (deletedPost) {
-        res.status(200).send({
-          success: true,
-          message: 'Post deleted successfully',
-        });
+        res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Post deleted successfully',
+          })
+        );
       } else {
-        res.status(403).send({
-          success: false,
-          message: 'Post cant be deleted.',
-        });
+        res.status(403).send(new ErrorApiResponse('Post cant be deleted.'));
       }
       console.log('deleted post==', deletedPost);
     } catch (error) {
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -141,17 +135,15 @@ export class PostController {
           },
         },
       ]);
-      return res.status(200).send({
-        message: 'Post fetched successfully',
-        data: posts,
-        success: true,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Post fetched successfully',
+          data: posts,
+        })
+      );
     } catch (error) {
       console.log('error', error);
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -175,10 +167,7 @@ export class PostController {
         });
       }
     } catch (error) {
-      res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 }

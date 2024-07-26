@@ -8,6 +8,7 @@ import { serverError } from '../constants.js';
 import { determineUpOrDownSubs } from '../utils/determineUpgradeOrDowngrade.js';
 import { generateQRCodeURL } from '../utils/generateQrCode.js';
 import { verifyOTP } from '../utils/verifyOtp.js';
+import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
@@ -20,16 +21,14 @@ export class UserController {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       };
-      res.status(200).send({
-        data: data,
-        success: true,
-        message: 'User info',
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          data: data,
+          message: 'Ok',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -152,21 +151,16 @@ export class UserController {
         'avatar bio hobbies'
       );
       if (!user) {
-        return res.status(404).send({
-          success: false,
-          message: 'User not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
-      return res.status(200).send({
-        success: true,
-        message: 'User found',
-        data: user,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Ok',
+          data: user,
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -174,10 +168,9 @@ export class UserController {
     const { userId } = req.params;
     try {
       if (userId === req.user.id) {
-        return res.status(400).send({
-          success: false,
-          message: 'Cant follow to own id',
-        });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Cant follow to own id'));
       }
 
       const followreq = await FollowRequest.findOne({
@@ -185,41 +178,38 @@ export class UserController {
         receiver: userId,
       });
       if (req.user.following.includes(userId)) {
-        return res.status(400).send({
-          success: false,
-          message: 'Already following user',
-        });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Already following user'));
       }
       if (followreq) {
         const deletedItem = await FollowRequest.deleteOne({
           _id: followreq.id,
         });
         if (deletedItem) {
-          return res.status(200).send({
-            success: true,
-            message: 'Follow request unsent',
-          });
+          return res.status(200).send(
+            new SuccessApiResponse({
+              message: 'Follow request unsent',
+            })
+          );
         } else {
-          return res.status(404).send({
-            success: true,
-            message: 'Follow request not found',
-          });
+          return res
+            .status(404)
+            .send(new ErrorApiResponse('Follow request not found'));
         }
       } else {
         await FollowRequest.create({
           sender: req.user.id,
           receiver: userId,
         });
-        return res.status(200).send({
-          success: true,
-          message: 'Follow request sent',
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Follow request sent',
+          })
+        );
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -236,16 +226,14 @@ export class UserController {
           populate: { path: 'profile', select: 'bio avatar' },
         });
 
-      res.status(200).send({
-        success: true,
-        data: followRequests,
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          data: followRequests,
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -257,10 +245,9 @@ export class UserController {
         receiver: req.user.id,
       });
       if (!followReqObj) {
-        return res.status(404).send({
-          success: false,
-          message: 'No follow request exists',
-        });
+        return res
+          .status(404)
+          .send(new ErrorApiResponse('No follow request exists'));
       }
 
       const user = req.user;
@@ -269,23 +256,18 @@ export class UserController {
       await user.save();
       const followRequstingUser = await User.findById(userId);
       if (!this.followUnfollowRequest) {
-        return res.status(404).send({
-          success: false,
-          message: 'User not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
       followRequstingUser.following.push(req.user.id);
       await followRequstingUser.save();
       await FollowRequest.deleteOne({ _id: followReqObj.id });
-      return res.status(200).send({
-        success: true,
-        message: 'Follow request accepted',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Follow request accepted',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -297,22 +279,19 @@ export class UserController {
         receiver: req.user.id,
       });
       if (!followReqObj) {
-        return res.status(404).send({
-          success: false,
-          message: 'No follow request exists',
-        });
+        return res
+          .status(404)
+          .send(new ErrorApiResponse('No follow request exists'));
       }
 
       await FollowRequest.deleteOne({ _id: followReqObj.id });
-      res.status(200).send({
-        success: true,
-        message: 'Follow request unsent',
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Follow request unsent',
+        })
+      );
     } catch (error) {
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -324,17 +303,15 @@ export class UserController {
           { _id: { $nin: req.user.following } },
         ],
       });
-      return res.status(200).send({
-        success: true,
-        data: users,
-        message: 'User fetched successfully',
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: users,
+          message: 'User fetched successfully',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -343,30 +320,26 @@ export class UserController {
     try {
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).send({
-          success: false,
-          message: 'User not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
       if (!req.user.following.includes(userId)) {
-        return res.status(400).send({
-          success: false,
-          message: 'Cant unfollow user. Not in following list',
-        });
+        return res
+          .status(400)
+          .send(
+            new ErrorApiResponse('Cant unfollow user. Not in following list')
+          );
       }
 
       req.user.following.splice(req.user.following.indexOf(userId), 1);
       await req.user.save();
-      res.status(200).send({
-        success: true,
-        message: 'User unfollowed',
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          message: 'User unfollowed',
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -379,17 +352,15 @@ export class UserController {
         { password: 0 }
       ).populate('profile');
       console.log(users);
-      res.status(200).send({
-        message: 'Followings fetched successfully',
-        success: true,
-        data: users,
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Followings fetched successfully',
+          data: users,
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -402,17 +373,15 @@ export class UserController {
         { password: 0 }
       ).populate('profile');
       console.log(users);
-      res.status(200).send({
-        message: 'Followers fetched successfully',
-        success: true,
-        data: users,
-      });
+      res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Followers fetched successfully',
+          data: users,
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send({
-        message: 'something went wrong',
-        success: false,
-      });
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -422,10 +391,7 @@ export class UserController {
     try {
       const userToSubscribe = await User.findById(userId);
       if (!userToSubscribe) {
-        return res.status(404).send({
-          message: 'User not found',
-          success: false,
-        });
+        return res.status(404).send(new ErrorApiResponse('User not found'));
       }
 
       const subscriptionObj = await Subscription.findOne({
@@ -435,16 +401,14 @@ export class UserController {
 
       if (subscriptionObj) {
         await Subscription.deleteOne({ _id: subscriptionObj.id });
-        return res.status(404).send({
-          message: 'Subscription removed successfully.',
-          success: false,
-        });
+        return res
+          .status(404)
+          .send(new ErrorApiResponse('Subscription removed successfully.'));
       }
       if (userToSubscribe.id == req.user.id) {
-        return res.status(400).send({
-          message: 'Cant subscribe to own id',
-          success: false,
-        });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Cant subscribe to own id'));
       }
 
       const subscriptionTime = createSubscriptionTime(renewalPeriod);
@@ -456,14 +420,15 @@ export class UserController {
         renewalPeriod: renewalPeriod,
         expiryTime: subscriptionTime,
       });
-      return res.status(201).send({
-        success: true,
-        message: 'Subscription added successfully',
-        data: subscription,
-      });
+      return res.status(201).send(
+        new SuccessApiResponse({
+          message: 'Subscription added successfully',
+          data: subscription,
+        })
+      );
     } catch (error) {
       console.log(error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
 
     // try {
@@ -529,10 +494,9 @@ export class UserController {
       });
 
       if (!subscription) {
-        return res.status(404).send({
-          succe: false,
-          message: 'Subscription not found',
-        });
+        return res
+          .status(404)
+          .send(new ErrorApiResponse('Subscription not found'));
       }
       const upgradeOrDownStatus = determineUpOrDownSubs(
         subscription.renewalPeriod,
@@ -548,10 +512,11 @@ export class UserController {
           subscription.expiryTime = newsubscriptionTime;
           subscription.renewalPeriod = renewalPeriod;
           await subscription.save();
-          return res.status(200).send({
-            success: true,
-            message: 'Subscription added successfully',
-          });
+          return res.status(200).send(
+            new SuccessApiResponse({
+              message: 'Subscription added successfully',
+            })
+          );
         } else {
           const newsubscriptionTime = createSubscriptionTime(renewalPeriod);
           const expiryTime = moment(subscription.expiryTime).utc();
@@ -574,10 +539,11 @@ export class UserController {
           subscription.expiryTime = newExpiryDate;
           subscription.renewalPeriod = renewalPeriod;
           await subscription.save();
-          res.status(200).send({
-            success: true,
-            message: 'Subscription upgraded successfully',
-          });
+          res.status(200).send(
+            new SuccessApiResponse({
+              message: 'Subscription upgraded successfully',
+            })
+          );
         }
       } else {
         //downgrade user renewal period
@@ -585,14 +551,15 @@ export class UserController {
         subscription.expiryTime = newsubscriptionTime;
         subscription.renewalPeriod = renewalPeriod;
         await subscription.save();
-        res.status(200).send({
-          success: true,
-          message: 'Subscription downgraded successfully',
-        });
+        res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Subscription downgraded successfully',
+          })
+        );
       }
     } catch (error) {
       console.log(error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -602,20 +569,22 @@ export class UserController {
       console.log('mfa-status', req.user.mfaEnabled);
 
       if (req.user.mfaEnabled) {
-        return res.status(200).send({
-          success: true,
-          message: 'Mfa alredy enabled',
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Mfa alredy enabled',
+          })
+        );
       }
       await User.updateOne({ _id: req.user.id }, { googleAuthSecret: secret });
-      return res.status(200).send({
-        message: 'Qr generated successfully',
-        success: true,
-        data: QR,
-      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Qr generated successfully',
+          data: QR,
+        })
+      );
     } catch (error) {
       console.log(error);
-      return res.status(500).send(serverError);
+      return res.status(500).send(new ErrorApiResponse());
     }
   };
 
@@ -632,21 +601,21 @@ export class UserController {
           { mfaEnabled: true },
           { new: true }
         );
-        return res.status(200).send({
-          success: true,
-          message: 'Mfa enabled',
-          data: data,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Mfa enabled',
+            data: data,
+          })
+        );
       } else {
-        return res.status(400).send({
-          success: false,
-          message: 'Cant enable mfa. Invalid token',
-        });
+        return res
+          .status(400)
+          .send(new ErrorApiResponse('Cant enable mfa. Invalid token'));
       }
     } catch (error) {
       console.log('inside catch==');
       console.log('error=====', error);
-      res.status(500).send(serverError);
+      res.status(500).send(new ErrorApiResponse());
     }
   };
 }

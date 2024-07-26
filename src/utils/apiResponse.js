@@ -1,13 +1,17 @@
-class ApiResponse {
-  constructor({ message, success, data, statusCode, errors }) {
+export class SuccessApiResponse {
+  success;
+  constructor({ message, data = null }) {
     this.message = message;
-    this.success = success;
-    if (data != null) {
-      this.data = data;
-    }
-    success = statusCode < 400;
-    if (errors != null) {
-      this.errors = errors;
-    }
+    this.success = true;
+    this.data = data;
+  }
+}
+
+export class ErrorApiResponse {
+  success;
+  errors = {};
+  constructor(message = 'Something went wrong') {
+    this.errors.message = message;
+    this.success = false;
   }
 }
