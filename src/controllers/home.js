@@ -23,7 +23,7 @@ export class HomeController {
       const lookupPosts = await Post.aggregate([
         {
           $match: {
-            user: { $in: userFollowings },
+            // user: { $in: userFollowings },
           },
         },
         {
