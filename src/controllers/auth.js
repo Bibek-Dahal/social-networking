@@ -248,14 +248,14 @@ export class AuthController {
         uuid: tokens.uuid,
       });
 
+      const newUser = user.toObject();
+      delete newUser.password;
+      console.log('newUser===', newUser);
       res.status(200).send(
         new SuccessApiResponse({
           data: {
             ...tokens,
-            id: user._id,
-            userName: user.userName,
-            email: user.email,
-            role: user.role,
+            ...newUser,
           },
           message: 'User login successfull.',
         })
