@@ -255,7 +255,7 @@ export class AuthController {
         new SuccessApiResponse({
           data: {
             ...tokens,
-            ...newUser,
+            user: newUser,
           },
           message: 'User login successfull.',
         })
