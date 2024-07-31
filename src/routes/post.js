@@ -20,14 +20,13 @@ router.patch('/:id', [
   PostValidator.updatePost,
   PostController.updatePost,
 ]);
-//list all user posts
-router.get('/', [PostController.listAllPosts]);
 
 router.delete('/:id', PostController.deletePost);
 
-router.get('/:id', PostController.getPostById);
-
 router.post('/add-remove-favourite/:postId', PostController.addFavouritePost);
-router.get('/list-favourite-posts', PostController.addFavouritePost);
+router.get('/list-favourite-posts', PostController.listFavouritePosts);
+//list all user posts
+router.get('/', [PostController.listAllPosts]);
+router.get('/:id', PostController.getPostById);
 
 export default router;

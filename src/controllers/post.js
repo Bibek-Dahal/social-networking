@@ -149,11 +149,12 @@ export class PostController {
   };
 
   static listFavouritePosts = async (req, res) => {
+    console.log('list favourite post called', req.user);
     try {
       const posts = await Post.aggregate([
         {
           $match: {
-            favouritePost: {
+            _id: {
               $in: req.user.favouritePost,
             },
           },
@@ -209,7 +210,10 @@ export class PostController {
           data: posts,
         })
       );
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(new ErrorApiResponse());
+    }
   };
 
   static addFavouritePost = async (req, res) => {
