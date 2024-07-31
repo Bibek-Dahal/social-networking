@@ -60,7 +60,14 @@ export class HomeController {
         },
         {
           $addFields: {
-            likedByCurrentUser: { $gt: [{ $size: '$likes' }, 0] }, // Check if there are any likes (user has liked)
+            likedByCurrentUser: { $gt: [{ $size: '$likes' }, 0] },
+            isFavourite: {
+              $cond: {
+                if: { $in: ['$_id', req.user.favouritePost] }, // Check if the post ID is in user's favouritePost array
+                then: true,
+                else: false,
+              },
+            }, // Check if there are any likes (user has liked)
           },
         },
         {

@@ -170,6 +170,13 @@ export class PostController {
         {
           $addFields: {
             user: { $arrayElemAt: ['$user', 0] }, // Take the first (and only) element from user array
+            isFavourite: {
+              $cond: {
+                if: { $in: ['$_id', req.user.favouritePost] }, // Check if the post ID is in user's favouritePost array
+                then: true,
+                else: false,
+              },
+            },
           },
         },
         {
