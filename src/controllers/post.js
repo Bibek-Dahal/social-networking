@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Post } from '../models/post.js';
 import { eventEmitter } from '../utils/eventHandler.js';
 import { Schema } from 'mongoose';
+import { User } from '../models/user.js';
 
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 
@@ -147,6 +148,111 @@ export class PostController {
     }
   };
 
+  static listFavouritePosts = async (req, res) => {
+    try {
+      const posts = await Post.aggregate([
+        {
+          $match: {
+            favouritePost: {
+              $in: req.user.favouritePost,
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $addFields: {
+            user: { $arrayElemAt: ['$user', 0] }, // Take the first (and only) element from user array
+          },
+        },
+        {
+          $lookup: {
+            from: 'likes',
+            let: { postId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] }, // Match likes for the current post
+                      { $eq: ['$user', req.user._id] }, // Match likes by the current user
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'likes',
+          },
+        },
+        {
+          $addFields: {
+            likedByCurrentUser: { $gt: [{ $size: '$likes' }, 0] }, // Check if there are any likes (user has liked)
+          },
+        },
+        {
+          $project: {
+            'user.password': 0,
+            likes: 0, // Exclude likes array from the final output if not needed
+            // Add other fields to project if needed
+          },
+        },
+      ]);
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'Post fetched successfully',
+          data: posts,
+        })
+      );
+    } catch (error) {}
+  };
+
+  static addFavouritePost = async (req, res) => {
+    try {
+      console.log('req.params', req.params);
+      const post = await Post.findById(req.params.postId);
+      const userId = new mongoose.Types.ObjectId(`${req.user.id}`);
+      const userFavouritePosts = req.user.favouritePost;
+      console.log('user-fav', userFavouritePosts);
+      if (!post) {
+        c;
+        return res.status(400).send(new ErrorApiResponse('Post not found'));
+      }
+
+      if (
+        !userFavouritePosts.includes(new mongoose.Types.ObjectId(`${post.id}`))
+      ) {
+        console.log('inside if==');
+        await req.user.favouritePost.addToSet(post.id);
+        req.user.save();
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'post added to favourite post list',
+          })
+        );
+      } else {
+        console.log('inside else');
+        await User.updateOne(
+          { _id: req.user.id },
+          { $pull: { favouritePost: post._id } }
+        );
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'post removed from favourite post list',
+          })
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(new ErrorApiResponse());
+    }
+  };
+
   static getPostById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -155,16 +261,14 @@ export class PostController {
         'userName email followers following'
       );
       if (post) {
-        return res.status(200).send({
-          success: true,
-          message: 'Post fetched successfully',
-          data: post,
-        });
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Post fetched successfully',
+            data: post,
+          })
+        );
       } else {
-        return res.status(404).send({
-          success: false,
-          message: 'Post not found',
-        });
+        return res.status(404).send(new ErrorApiResponse('Post not found'));
       }
     } catch (error) {
       res.status(500).send(new ErrorApiResponse());

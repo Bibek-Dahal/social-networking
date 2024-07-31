@@ -16,7 +16,6 @@ router.post('/', [
 ]);
 
 router.patch('/:id', [
-  checkMongoId,
   postUpload.single('image'),
   PostValidator.updatePost,
   PostController.updatePost,
@@ -24,8 +23,11 @@ router.patch('/:id', [
 //list all user posts
 router.get('/', [PostController.listAllPosts]);
 
-router.delete('/:id', checkMongoId, PostController.deletePost);
+router.delete('/:id', PostController.deletePost);
 
-router.get('/:id', checkMongoId, PostController.getPostById);
+router.get('/:id', PostController.getPostById);
+
+router.post('/add-remove-favourite/:postId', PostController.addFavouritePost);
+router.get('/list-favourite-posts', PostController.addFavouritePost);
 
 export default router;

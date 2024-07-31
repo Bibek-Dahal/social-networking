@@ -38,6 +38,8 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    favouritePost: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
+
     blockUser: {
       type: Boolean,
       default: false,
