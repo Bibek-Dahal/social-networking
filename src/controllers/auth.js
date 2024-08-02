@@ -15,7 +15,7 @@ import { OTPmodel } from '../models/otpModel.js';
 import { OtpType } from '../constants.js';
 import { generateOTP } from '../utils/generateOtp.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
-
+import { uploadFile } from '../middlewares/firabase-image-upload.js';
 export class AuthController {
   static register = async (req, res) => {
     try {
@@ -38,6 +38,10 @@ export class AuthController {
       }
       if (req.file) {
         req.body.avatar = req.file.filename;
+
+        const result = await uploadFile(req.file);
+        req.body.avatar = result;
+        console.log('result==', result);
       }
       const user = await User.create(req.body);
       const { token: emailToken } = await generateToken(

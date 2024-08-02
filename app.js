@@ -38,6 +38,7 @@ import gql from 'graphql-tag';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
 import cors from 'cors';
 import customAuthMiddleware from './src/middlewares/custom_auth_middleware.js';
+import { firebaseInit } from './src/config/firebase-config.js';
 const corsOptions = {
   origin: '*',
   // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -172,6 +173,8 @@ import moment from 'moment';
 import { authMiddleware } from './src/middlewares/auth.js';
 import { UserRepository } from './src/graphql/repository/userRepository.js';
 import { AuthService } from './src/graphql/services/authServices.js';
+
+export const bucket = await firebaseInit();
 
 console.log(moment().utc());
 console.log(moment.utc().local());

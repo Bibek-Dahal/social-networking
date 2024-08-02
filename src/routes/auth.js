@@ -6,11 +6,14 @@ import { userBlockMiddleware } from '../middlewares/userBlockMiddleware.js';
 import { verifyOTP } from '../middlewares/verifyOtp.js';
 import passport from 'passport';
 import { avatarUpload } from '../config/multer_config.js';
+import multer from 'multer';
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
 router.post('/register', [
-  avatarUpload.single('avatar'),
+  upload.single('avatar'),
   AuthValidator.register,
   AuthController.register,
 ]);
