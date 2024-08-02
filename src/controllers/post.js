@@ -79,17 +79,24 @@ export class PostController {
       // Convert to string if needed
       console.log(typeof req.user.id);
       const userId = new mongoose.Types.ObjectId(`${req.user.id}`);
-      // const posts = await Post.find({ user: req.user.id }).populate(
-      //   'user',
-      //   'userName email followers following'
-      // );
-      // console.log('posts===', posts);
+      const recentPost = req.query.recentPost == 'true' ? true : false || false;
+      const now = new Date();
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0)); // Start of the day
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setDate(startOfDay.getDate() + 1);
 
       const posts = await Post.aggregate([
         {
-          $match: {
-            user: userId,
-          },
+          $match: recentPost
+            ? {
+                createdAt: {
+                  $gte: startOfDay,
+                  $lt: endOfDay,
+                },
+              }
+            : {
+                user: userId,
+              },
         },
         {
           $lookup: {
