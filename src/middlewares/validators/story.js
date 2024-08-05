@@ -5,9 +5,7 @@ export class StoryValidator {
   static async createStory(req, res, next) {
     const schema = Joi.object({
       content: Joi.string().trim().max(200),
-      contentType: Joi.Joi.any()
-        .valid(storyType.Image, storyType.Note)
-        .required(),
+      contentType: Joi.any().valid(storyType.Image, storyType.Note).required(),
       image: Joi.string(),
     });
 

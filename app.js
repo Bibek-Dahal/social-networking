@@ -21,6 +21,7 @@ import {
   home,
   adminUser,
   test,
+  story,
 } from './src/routes/index.js';
 import './src/passport/stratigies/jwt_strategy.js';
 import './src/passport/stratigies/google_strategy.js';
@@ -63,6 +64,7 @@ app.use('/api/like', like);
 app.use('/api/event', event);
 app.use('/api/chat', chat);
 app.use('/api/test', test);
+app.use('/api/story', story);
 app.use('/api/static', express.static('./src/public'));
 
 app.use('/api/admin/users', adminUser);

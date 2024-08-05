@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { storyType } from '../constants';
+import { storyType } from '../constants.js';
 const { Schema } = mongoose;
 
 const storySchema = new Schema(

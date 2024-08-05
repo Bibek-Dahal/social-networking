@@ -68,7 +68,7 @@ export class CommentController {
         const post = await Post.findById(comment.post);
 
         if (comment.user == req.user.id || post.user == req.user.id) {
-          Comment.deleteOne({ _id: commentId });
+          await Comment.deleteOne({ _id: commentId });
         }
         if (post.commentCount != 0) {
           post.commentCount -= 1;
