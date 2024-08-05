@@ -171,7 +171,7 @@ export class AuthController {
       const user = await User.findOne({ email: email });
       if (!user) {
         return res
-          .status(400)
+          .status(401)
           .send(
             new ErrorApiResponse(
               'The provided credential do not match our record'
@@ -221,7 +221,7 @@ export class AuthController {
       const result = await User.comparePassword(password, user.password);
       if (!result) {
         return res
-          .status(400)
+          .status(401)
           .send(
             new ErrorApiResponse(
               'The provided credential do not match our record'

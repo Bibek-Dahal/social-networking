@@ -10,6 +10,11 @@ export const userRoles = {
   Admin: 'Admin',
 };
 
+export const storyType = {
+  Image: 'Image',
+  Note: 'Note',
+};
+
 export const SubscriptionPeriod = {
   Minutes: 'Minutes',
   Monthly: 'Monthly',
