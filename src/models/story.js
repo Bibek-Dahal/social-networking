@@ -14,7 +14,26 @@ const storySchema = new Schema(
       type: String,
       required: true,
     },
-
+    viewers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+      },
+    ],
+    reply: [
+      {
+        content: {
+          type: String,
+          required: true,
+        },
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+      },
+    ],
     contentType: {
       type: String,
       required: true,

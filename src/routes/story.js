@@ -1,9 +1,9 @@
 import express from 'express';
 import { authMiddleware } from '../middlewares/auth.js';
-import multer from 'multer';
 import { StoryValidator } from '../middlewares/validators/story.js';
 import { StoryController } from '../controllers/story.js';
 
+import multer from 'multer';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const router = express.Router();
@@ -15,5 +15,14 @@ router.post('/', [
   StoryValidator.createStory,
   StoryController.create,
 ]);
+
+router.get('/list-viewers/:storyId/', StoryController.listViewers);
+
+router.put('/add-reply/:storyId', [
+  StoryValidator.addReply,
+  StoryController.addReply,
+]);
+router.get('/:storyId', [StoryController.getStory]);
+router.delete('/:storyId', [StoryController.deleteStory]);
 
 export default router;

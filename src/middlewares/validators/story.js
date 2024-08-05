@@ -11,4 +11,12 @@ export class StoryValidator {
 
     await showValidationsError(req, res, next, schema);
   }
+
+  static async addReply(req, res, next) {
+    const schema = Joi.object({
+      content: Joi.string().required().trim().max(100),
+    });
+
+    await showValidationsError(req, res, next, schema);
+  }
 }
