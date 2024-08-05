@@ -3,7 +3,7 @@ import { Post } from '../models/post.js';
 import { eventEmitter } from '../utils/eventHandler.js';
 import { Schema } from 'mongoose';
 import { User } from '../models/user.js';
-
+import { uploadFile } from '../middlewares/firabase-image-upload.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 
 export class PostController {
@@ -12,8 +12,11 @@ export class PostController {
       const data = req.body;
       data.user = req.user.id;
       if (req.file) {
-        data.image = req.file.filename;
+        const result = await uploadFile(req.file);
+        data.image = result;
+        console.log('result==', result);
       }
+
       const post = await Post.create(data);
       eventEmitter.emit('increasePostCount', req.user);
       return res.status(201).send(
@@ -32,7 +35,9 @@ export class PostController {
     const { id } = req.params;
 
     if (req.file) {
-      req.body.image = req.file.filename;
+      const result = await uploadFile(req.file);
+      req.body.image = result;
+      console.log('result==', result);
     }
     try {
       console.log(req.body);

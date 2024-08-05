@@ -5,18 +5,22 @@ import { PostValidator } from '../middlewares/validators/post_validator.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { userBlockMiddleware } from '../middlewares/userBlockMiddleware.js';
 import { checkMongoId } from '../utils/checkIfMongoId.js';
-const router = express.Router();
+import multer from 'multer';
 
+const router = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 router.use(authMiddleware);
 router.use(userBlockMiddleware);
+
 router.post('/', [
-  postUpload.single('image'),
+  upload.single('image'),
   PostValidator.createPost,
   PostController.createPost,
 ]);
 
 router.patch('/:id', [
-  postUpload.single('image'),
+  upload.single('image'),
   PostValidator.updatePost,
   PostController.updatePost,
 ]);
