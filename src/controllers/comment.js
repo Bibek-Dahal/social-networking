@@ -70,9 +70,11 @@ export class CommentController {
         if (comment.user == req.user.id || post.user == req.user.id) {
           Comment.deleteOne({ _id: commentId });
         }
+        if (post.commentCount != 0) {
+          post.commentCount -= 1;
+          await post.save();
+        }
 
-        post.commentCount -= 1;
-        await post.save();
         return res.status(200).send(
           new SuccessApiResponse({
             message: 'Comment Deleted Successfully',
