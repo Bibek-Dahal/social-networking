@@ -31,6 +31,7 @@ router.post('/add-remove-favourite/:postId', PostController.addFavouritePost);
 router.get('/list-favourite-posts', PostController.listFavouritePosts);
 //list all user posts
 router.get('/', [PostController.listAllPosts]);
+router.get('/list-user-post/:userId', PostController.listUserPostByUserId);
 router.get('/:id', PostController.getPostById);
 
 export default router;
