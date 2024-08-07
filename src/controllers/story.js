@@ -48,6 +48,26 @@ export class StoryController {
     }
   };
 
+  static listAllStories = async (req, res) => {
+    try {
+      const stories = await Story.find({}).populate({
+        path: 'user',
+        select: {
+          userName: 1,
+          avatar: 1,
+        },
+      });
+      return res.status(200).send(
+        new SuccessApiResponse({
+          data: stories,
+        })
+      );
+    } catch (error) {
+      console.log('error', error);
+      return res.status(500).send(new ErrorApiResponse());
+    }
+  };
+
   static getStory = async (req, res) => {
     try {
       const { storyId } = req.params;

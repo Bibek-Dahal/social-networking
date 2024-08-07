@@ -22,6 +22,8 @@ router.put('/add-reply/:storyId', [
   StoryValidator.addReply,
   StoryController.addReply,
 ]);
+
+router.get('/stories', StoryController.listAllStories);
 router.get('/:storyId', [StoryController.getStory]);
 router.delete('/:storyId', [StoryController.deleteStory]);
 

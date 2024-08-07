@@ -2,7 +2,8 @@ import { Chat } from '../models/chat.js';
 import { Room } from '../models/room.js';
 import { User } from '../models/user.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
-
+import { paginate } from '../utils/pagination.js';
+import { prepareSearchQuery } from '../utils/prepareSearchQuery.js';
 export class ChatController {
   static getOrCreateRoomName = async (senderId, reveiverId) => {
     const userIds = [senderId, reveiverId];
@@ -92,6 +93,7 @@ export class ChatController {
 
   static listAllMessages = async (req, res) => {
     const { userId } = req.params;
+
     try {
       const user = await User.findById(userId);
       if (req.user.id == userId) {
@@ -145,14 +147,24 @@ export class ChatController {
   };
 
   static listUserToChat = async (req, res) => {
+    const searchFields = ['userName', 'email'];
+    let filterQuery = { _id: { $nin: req.user.id } };
+    let sq = prepareSearchQuery(req, searchFields);
+    if (sq) {
+      filterQuery = { ...filterQuery, ...sq };
+    }
+
+    const query = User.find(filterQuery, { password: 0 });
     try {
-      const users = await User.find(
-        { _id: { $nin: req.user.id } },
-        { password: 0 }
-      ).populate('profile');
+      const { data, count } = await paginate({
+        req,
+        model: User,
+        filterQuery,
+        query,
+      });
       return res.status(200).send(
         new SuccessApiResponse({
-          data: users,
+          data: data,
           message: 'User fetched successfully',
         })
       );
