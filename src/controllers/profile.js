@@ -62,10 +62,10 @@ export class ProfileController {
 
   static getProfileById = async (req, res) => {
     console.log(req.params);
-    const { profileId } = req.params;
-    console.log('profiled===', profileId);
+    const { userId } = req.params;
+    console.log('profiled===', userId);
     try {
-      const profile = await Profile.findById(profileId).populate({
+      const profile = await Profile.findOne({ user: userId }).populate({
         path: 'user',
         select: { password: 0, googleAuthSecret: 0 },
       });
