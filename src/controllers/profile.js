@@ -1,5 +1,6 @@
 import { Profile } from '../models/profile.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
+import { Post } from '../models/post.js';
 export class ProfileController {
   static updateProfle = async (req, res) => {
     try {
@@ -73,16 +74,74 @@ export class ProfileController {
       if (!profile) {
         return res.status(404).send(new ErrorApiResponse('Profile not found'));
       }
-      console.log('show phone number', profile.showPhoneNumber);
-      if (!profile.showPhoneNumber) {
-        console.log('inside if');
 
-        delete profile.phoneNumber;
-      }
+      const posts = await Post.aggregate([
+        {
+          $match: {
+            user: req.user._id,
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $addFields: {
+            user: { $arrayElemAt: ['$user', 0] }, // Take the first (and only) element from user array
+            isFavourite: {
+              $cond: {
+                if: { $in: ['$_id', req.user.favouritePost] }, // Check if the post ID is in user's favouritePost array
+                then: true,
+                else: false,
+              },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'likes',
+            let: { postId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] }, // Match likes for the current post
+                      { $eq: ['$user', req.user._id] }, // Match likes by the current user
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'likes',
+          },
+        },
+        {
+          $addFields: {
+            likedByCurrentUser: { $gt: [{ $size: '$likes' }, 0] }, // Check if there are any likes (user has liked)
+          },
+        },
+        {
+          $project: {
+            'user.password': 0,
+            likes: 0, // Exclude likes array from the final output if not needed
+            // Add other fields to project if needed
+          },
+        },
+      ]);
+
+      const resData = {
+        profile: profile,
+        posts: posts,
+      };
 
       return res.status(200).send(
         new SuccessApiResponse({
-          data: profile,
+          data: resData,
           message: 'Profile fetched.',
         })
       );
