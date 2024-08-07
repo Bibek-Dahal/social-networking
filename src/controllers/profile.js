@@ -1,6 +1,7 @@
 import { Profile } from '../models/profile.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 import { Post } from '../models/post.js';
+import mongoose from 'mongoose';
 export class ProfileController {
   static updateProfle = async (req, res) => {
     try {
@@ -65,6 +66,7 @@ export class ProfileController {
     console.log(req.params);
     const { userId } = req.params;
     console.log('profiled===', userId);
+    const mongooseUserId = new mongoose.Types.ObjectId(`${userId}`);
     try {
       const profile = await Profile.findOne({ user: userId }).populate({
         path: 'user',
@@ -78,7 +80,7 @@ export class ProfileController {
       const posts = await Post.aggregate([
         {
           $match: {
-            user: req.user._id,
+            user: mongooseUserId,
           },
         },
         {
