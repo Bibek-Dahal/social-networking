@@ -63,6 +63,16 @@ export class AuthValidator {
     await showValidationsError(req, res, next, schema);
   };
 
+  static enableBiometric = async (req, res, next) => {
+    const schema = Joi.object({
+      deviceId: Joi.string().required(),
+      deviceModel: Joi.string().required(),
+      userId: Joi.string().required(),
+    });
+
+    await showValidationsError(req, res, next, schema);
+  };
+
   static logout = async (req, res, next) => {
     const schema = Joi.object({
       refreshToken: Joi.string().required(),

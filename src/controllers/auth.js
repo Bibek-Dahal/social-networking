@@ -16,7 +16,47 @@ import { OtpType } from '../constants.js';
 import { generateOTP } from '../utils/generateOtp.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 import { uploadFile } from '../middlewares/firabase-image-upload.js';
+
 export class AuthController {
+  static enableBoimetric = async (req, res) => {
+    try {
+      const { deviceId, deviceModel } = req.body;
+      const userId = req.user.id;
+      const user = req.user;
+      const uuid = uuidv4();
+      const jwtPayload = {
+        userId: userId,
+        deviceId: deviceId,
+        deviceModel: deviceModel,
+        uuid: uuid,
+      };
+      const token = jwt.sign(
+        {
+          exp: Math.floor(Date.now() / 1000) + accessTokenLifeTime,
+          data: jwtPayload,
+        },
+        process.env.JWT_REFRESH_SECRET
+      );
+      await Jwt.create({
+        user: req.user.id,
+        uuid: uuid,
+      });
+      const tokens = await req.user.generateJwtTokens();
+      const { password, ...userWithoutPassword } = req.user;
+      res.status(200).send(
+        new SuccessApiResponse({
+          data: {
+            ...tokens,
+            user: userWithoutPassword,
+          },
+          message: 'User login successfull.',
+        })
+      );
+    } catch (error) {
+      return res.status(500).send(new ErrorApiResponse());
+    }
+  };
+
   static register = async (req, res) => {
     try {
       const userWithUserName = await User.findOne({

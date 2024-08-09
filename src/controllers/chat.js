@@ -133,7 +133,10 @@ export class ChatController {
         { new: true }
       );
       console.log('updatedData==', updatedData);
-      const messages = await Chat.find({ room: room.room });
+      const messages = await Chat.find({ room: room.room }).populate({
+        path: 'sender receiver',
+        select: '-password -googleAuthSecret', // Exclude password field
+      });
       return res.status(200).send(
         new SuccessApiResponse({
           message: 'Messages fetched successfully',
