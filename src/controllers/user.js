@@ -49,6 +49,20 @@ export class UserController {
         );
       }
 
+      if (req.file) {
+        req.body.avatar = req.file.filename;
+
+        const result = await uploadFile(req.file);
+        user.avatar = result;
+        console.log('result==', result);
+        await user.save();
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Avatar changed successfully',
+          })
+        );
+      }
+
       if (req.body.fcmToken) {
         const result = await User.updateOne(
           {
