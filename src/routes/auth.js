@@ -12,6 +12,13 @@ const upload = multer({ storage: storage });
 
 const router = express.Router();
 
+
+router.post('/enable-biometric', [
+  
+  AuthValidator.enableBiometric,
+  AuthController.register,
+]);
+
 router.post('/register', [
   upload.single('avatar'),
   AuthValidator.register,

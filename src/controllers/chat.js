@@ -70,7 +70,12 @@ export class ChatController {
       const lastMessagesPromises = rooms.map(async (item) => {
         const chat = await Chat.findOne({
           room: item.room,
-        }).sort('-createdAt');
+        })
+          .populate({
+            path: 'sender receiver',
+            select: '-password -googleAuthSecret', // Exclude password field
+          })
+          .sort('-createdAt');
         console.log('chat===', chat);
         if (chat != null) {
           return chat;

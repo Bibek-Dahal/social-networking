@@ -61,7 +61,7 @@ const userSchema = new Schema(
     },
     biometricEnabled: {
       type: Boolean,
-      default: false,
+      default: false, 
     },
     loggedInDevice: [{ deviceId: String, deviceModel: String }],
     followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
