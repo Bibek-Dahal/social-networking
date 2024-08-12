@@ -60,6 +60,9 @@ export class UserController {
         return res.status(200).send(
           new SuccessApiResponse({
             message: 'Avatar changed successfully',
+            data: {
+              avatar: user.avatar,
+            },
           })
         );
       }
