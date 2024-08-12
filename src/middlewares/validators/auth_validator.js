@@ -75,7 +75,7 @@ export class AuthValidator {
 
   static updateUser = async (req, res, next) => {
     const schema = Joi.object({
-      fcmToken: Joi.string().required(),
+      fcmToken: Joi.string(),
       avatar: Joi.string(),
     });
 

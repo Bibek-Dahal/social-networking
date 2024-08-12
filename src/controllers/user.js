@@ -9,6 +9,7 @@ import { determineUpOrDownSubs } from '../utils/determineUpgradeOrDowngrade.js';
 import { generateQRCodeURL } from '../utils/generateQrCode.js';
 import { verifyOTP } from '../utils/verifyOtp.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
+import { uploadFile } from '../middlewares/firabase-image-upload.js';
 export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
@@ -84,6 +85,12 @@ export class UserController {
           })
         );
       }
+
+      return res.status(200).send(
+        new SuccessApiResponse({
+          message: 'ok',
+        })
+      );
     } catch (error) {
       console.log('error', error);
       return res.status(500).send(new ErrorApiResponse());
