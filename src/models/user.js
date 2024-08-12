@@ -39,7 +39,12 @@ const userSchema = new Schema(
       default: null,
     },
     favouritePost: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
-
+    fcmTokens: [
+      {
+        fcm: String,
+        expiresAt: Date,
+      },
+    ],
     blockUser: {
       type: Boolean,
       default: false,
@@ -61,7 +66,7 @@ const userSchema = new Schema(
     },
     biometricEnabled: {
       type: Boolean,
-      default: false, 
+      default: false,
     },
     loggedInDevice: [{ deviceId: String, deviceModel: String }],
     followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],

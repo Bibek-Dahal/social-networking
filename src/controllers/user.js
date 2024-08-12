@@ -32,6 +32,50 @@ export class UserController {
     }
   };
 
+  static updateUser = async (req, res) => {
+    try {
+      const user = req.user;
+      const fcmExists = user.fcmTokens?.filter(
+        (item) => item.fcm == req.body.fcmToken
+      );
+
+      console.log('fcmToken===', fcmExists);
+
+      if (fcmExists.length != 0) {
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Token already exists',
+          })
+        );
+      }
+
+      if (req.body.fcmToken) {
+        const result = await User.updateOne(
+          {
+            _id: user.id,
+          },
+          {
+            $addToSet: {
+              fcmTokens: {
+                fcm: req.body.fcmToken,
+                expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+              },
+            },
+          }
+        );
+        console.log('res====', result);
+        return res.status(200).send(
+          new SuccessApiResponse({
+            message: 'Token added successfully',
+          })
+        );
+      }
+    } catch (error) {
+      console.log('error', error);
+      return res.status(500).send(new ErrorApiResponse());
+    }
+  };
+
   // static followUser = async (req, res) => {
   //   const { userId } = req.params;
   //   try {

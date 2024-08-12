@@ -3,6 +3,7 @@ import { UserController } from '../controllers/user.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { SubscriptionValidator } from '../middlewares/validators/subscription.js';
 import { checkMongoId } from '../utils/checkIfMongoId.js';
+import { AuthValidator } from '../middlewares/validators/auth_validator.js';
 const router = express.Router();
 
 // router.use(passport.authenticate("jwt", { session: false }));
@@ -43,6 +44,7 @@ router.get('/display-mfa-qr', [UserController.displayMfaQr]);
 router.post('/enable-mfa', [UserController.enableMfa]);
 
 router.get('/:userId', [checkMongoId, UserController.getUserById]);
+router.patch('/', AuthValidator.updateUser, UserController.updateUser);
 
 // router.post("/unfollow/:userId", UserController.unfollowUser);
 

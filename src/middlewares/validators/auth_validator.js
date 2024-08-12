@@ -73,6 +73,14 @@ export class AuthValidator {
     await showValidationsError(req, res, next, schema);
   };
 
+  static updateUser = async (req, res, next) => {
+    const schema = Joi.object({
+      fcmToken: Joi.string().required(),
+    });
+
+    await showValidationsError(req, res, next, schema);
+  };
+
   static logout = async (req, res, next) => {
     const schema = Joi.object({
       refreshToken: Joi.string().required(),
