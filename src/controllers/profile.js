@@ -2,6 +2,7 @@ import { Profile } from '../models/profile.js';
 import { SuccessApiResponse, ErrorApiResponse } from '../utils/apiResponse.js';
 import { Post } from '../models/post.js';
 import mongoose from 'mongoose';
+import { User } from '../models/user.js';
 export class ProfileController {
   static updateProfle = async (req, res) => {
     try {
@@ -73,6 +74,11 @@ export class ProfileController {
         select: { password: 0, googleAuthSecret: 0 },
       });
 
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).send(new ErrorApiResponse('Profile not found'));
+      }
+
       if (!profile) {
         return res.status(404).send(new ErrorApiResponse('Profile not found'));
       }
@@ -138,6 +144,7 @@ export class ProfileController {
 
       const resData = {
         profile: profile,
+        user: user,
         posts: posts,
       };
 

@@ -4,7 +4,6 @@ import { User } from '../models/user.js';
 import { subscriptionRate } from '../constants.js';
 import { createSubscriptionTime } from '../utils/createSubscriptionTime.js';
 import moment from 'moment';
-import { serverError } from '../constants.js';
 import { determineUpOrDownSubs } from '../utils/determineUpgradeOrDowngrade.js';
 import { generateQRCodeURL } from '../utils/generateQrCode.js';
 import { verifyOTP } from '../utils/verifyOtp.js';
