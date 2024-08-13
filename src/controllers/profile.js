@@ -74,7 +74,7 @@ export class ProfileController {
         select: { password: 0, googleAuthSecret: 0 },
       });
 
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).select('-password');
       if (!user) {
         return res.status(404).send(new ErrorApiResponse('Profile not found'));
       }
