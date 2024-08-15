@@ -60,11 +60,12 @@ io.on('connection', async (socket) => {
   socket.on('isRead', async (data) => {
     const { senderId, chatId } = data;
     try {
-      const updatedChat = await Chat.updateOne(
+      const updatedChat = await Chat.findOneAndUpdate(
         { _id: chatId },
-        { isRead: true }
+        { isRead: true },
+        { new: true }
       );
-      io.to(senderId).emit('isRead', { isRead: true });
+      io.to(senderId).emit('isRead', { chat: updatedChat });
     } catch (error) {
       console.log('error');
     }
