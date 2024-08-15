@@ -57,7 +57,7 @@ io.on('connection', async (socket) => {
     io.to(data.userId).emit('typingStarted', { isTyping: true });
   });
 
-  //emit typingStopped event when user is typing
+  //emit typingStopped event when user stopped typing
   socket.on('typingStopped', async (data) => {
     io.to(data.userId).emit('typingStopped', { isTyping: true });
   });
