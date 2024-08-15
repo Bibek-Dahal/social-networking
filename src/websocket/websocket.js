@@ -57,6 +57,19 @@ io.on('connection', async (socket) => {
     io.to(data.userId).emit('isTyping', { isTyping: true });
   });
 
+  socket.on('isRead', async (data) => {
+    const { senderId, chatId } = data;
+    try {
+      const updatedChat = await Chat.updateOne(
+        { _id: chatId },
+        { isRead: true }
+      );
+      io.to(senderId).emit('isRead', { isRead: true });
+    } catch (error) {
+      console.log('error');
+    }
+  });
+
   //join the room for private chatting
   socket.on('joinPrivateChatRoom', async (data) => {
     try {
