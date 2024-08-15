@@ -52,6 +52,10 @@ io.on('connection', async (socket) => {
     io.emit('llistOnlineUsers', onlineUsers);
   });
 
+  socket.on('isTyping', async (data) => {
+    io.to(data.userId).emit('isTyping', { isTyping: true });
+  });
+
   //join the room for private chatting
   socket.on('joinPrivateChatRoom', async (data) => {
     try {

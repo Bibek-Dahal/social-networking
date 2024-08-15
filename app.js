@@ -40,6 +40,7 @@ import { ApolloServerErrorCode } from '@apollo/server/errors';
 import cors from 'cors';
 import customAuthMiddleware from './src/middlewares/custom_auth_middleware.js';
 import { firebaseInit } from './src/config/firebase-config.js';
+import path from 'path';
 const corsOptions = {
   origin: '*',
   // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -50,6 +51,10 @@ export const baseDir = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 8000;
 app.use(cors(corsOptions));
+app.set('view engine', 'ejs');
+
+// Set the views directory
+app.set('views', path.join(process.cwd(), 'src', 'views'));
 //middlewares
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -72,6 +77,7 @@ app.use('/api/admin/posts', adminPost);
 app.use('/api/admin/subscriptions', subscription);
 
 app.get('/', async (req, res) => {
+  return res.render('home.ejs');
   res.status(200).send({ data: 'Hello World' });
 });
 
