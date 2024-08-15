@@ -13,14 +13,14 @@ export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
       // console.log(req.user);
-      const user = req.user;
-      const data = {
-        _id: user._id,
-        email: user.email,
-        userName: user.userName,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
+      const { password, ...data } = req.user;
+      // const data = {
+      //   _id: user._id,
+      //   email: user.email,
+      //   userName: user.userName,
+      //   createdAt: user.createdAt,
+      //   updatedAt: user.updatedAt,
+      // };
       res.status(200).send(
         new SuccessApiResponse({
           data: data,

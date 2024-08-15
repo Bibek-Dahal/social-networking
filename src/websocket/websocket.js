@@ -52,6 +52,7 @@ io.on('connection', async (socket) => {
     io.emit('llistOnlineUsers', onlineUsers);
   });
 
+  //emit isTyping event when user is typing
   socket.on('isTyping', async (data) => {
     io.to(data.userId).emit('isTyping', { isTyping: true });
   });
