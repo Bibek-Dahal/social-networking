@@ -13,7 +13,9 @@ export class UserController {
   static getLoggedInUser = (req, res) => {
     try {
       // console.log(req.user);
-      const { password, ...data } = req.user;
+
+      const newUser = req.user;
+      delete newUser.password;
       // const data = {
       //   _id: user._id,
       //   email: user.email,
@@ -23,7 +25,7 @@ export class UserController {
       // };
       res.status(200).send(
         new SuccessApiResponse({
-          data: data,
+          data: newUser,
           message: 'Ok',
         })
       );
