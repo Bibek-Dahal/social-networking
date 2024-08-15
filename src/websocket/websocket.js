@@ -52,9 +52,14 @@ io.on('connection', async (socket) => {
     io.emit('llistOnlineUsers', onlineUsers);
   });
 
-  //emit isTyping event when user is typing
-  socket.on('isTyping', async (data) => {
-    io.to(data.userId).emit('isTyping', { isTyping: true });
+  //emit typingStarted event when user is typing
+  socket.on('typingStarted', async (data) => {
+    io.to(data.userId).emit('typingStarted', { isTyping: true });
+  });
+
+  //emit typingStopped event when user is typing
+  socket.on('typingStopped', async (data) => {
+    io.to(data.userId).emit('typingStopped', { isTyping: true });
   });
 
   socket.on('isRead', async (data) => {
