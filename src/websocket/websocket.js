@@ -154,6 +154,10 @@ io.on('connection', async (socket) => {
       io.in(roomName.room).emit('privateMessage', {
         chat: populated_chat,
       });
+
+      io.to(receiver).emit('privateMessageToUpdateChat', {
+        chat: populated_chat,
+      });
     } catch (error) {
       console.log('error==', error);
       console.error('Error processing private message:', error);
