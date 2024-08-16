@@ -98,6 +98,27 @@ io.on('connection', async (socket) => {
     }
   });
 
+  //leave private chat room
+  socket.on('leavePrivateChatRoom', async (data) => {
+    try {
+      const parsedData = data;
+      const { userId } = parsedData;
+      const roomName = ChatController.getRoomName(userId, socket.user.id);
+
+      // Leave socket room
+      socket.leave(roomName);
+
+      console.log(`User ${socket.user.id} left room ${roomName}`);
+    } catch (error) {
+      console.log('error==', error);
+      console.error('Error processing leave room request:', error);
+      // Send error message back to the client
+      socket.emit('leavePrivateChatRoomError', {
+        error: 'Error processing leave room request',
+      });
+    }
+  });
+
   //emitted when user send private message
   socket.on('privateMessage', async (data) => {
     //user is already joined to room on its own id so socket.to(to) will send msg
