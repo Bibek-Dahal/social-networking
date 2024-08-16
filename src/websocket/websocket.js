@@ -103,12 +103,16 @@ io.on('connection', async (socket) => {
     try {
       const parsedData = data;
       const { userId } = parsedData;
-      const roomName = ChatController.getRoomName(userId, socket.user.id);
+      const roomName = await ChatController.getOrCreateRoomName(
+        userId,
+        socket.user.id
+      );
+      console.log('roomName.room==', roomName.room);
 
       // Leave socket room
-      socket.leave(roomName);
+      socket.leave(roomName.room);
 
-      console.log(`User ${socket.user.id} left room ${roomName}`);
+      console.log(`User ${socket.user.id} left room ${roomName.room}`);
     } catch (error) {
       console.log('error==', error);
       console.error('Error processing leave room request:', error);
