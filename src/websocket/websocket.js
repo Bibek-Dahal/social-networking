@@ -100,7 +100,10 @@ io.on('connection', async (socket) => {
         }
       );
 
-      const chats = await Chat.find({ room: roomName.room })
+      const chats = await Chat.find({
+        room: roomName.room,
+        receiver: socket.user.id,
+      })
         .populate('sender receiver') // Corrected the spelling here
         .select('-password') // Modified the select method
         .sort({ createdAt: -1 });
