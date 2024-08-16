@@ -65,11 +65,14 @@ io.on('connection', async (socket) => {
   socket.on('isRead', async (data) => {
     const { senderId, chatId } = data;
     try {
+      //todo
+      // populate sender and reveiver
       const updatedChat = await Chat.findOneAndUpdate(
         { _id: chatId },
         { isRead: true },
         { new: true }
       );
+
       io.to(senderId).emit('isRead', { chat: updatedChat });
     } catch (error) {
       console.log('error');
@@ -88,6 +91,22 @@ io.on('connection', async (socket) => {
       console.log('roomName.room==', roomName.room);
       //join socket to room
       socket.join(roomName.room);
+      await Chat.updateMany(
+        {
+          receiver: socket.user.id,
+        },
+        {
+          isRead: true,
+        }
+      );
+
+      const chats = await Chat.findOne({})
+        .populate('sender receiver') // Corrected the spelling here
+        .select('-password') // Modified the select method
+        .sort({ createdAt: -1 });
+      if (chats.length > 0) {
+        io.to(userId).emit('isRead', { chat: chats[0] });
+      }
     } catch (error) {
       console.log('error==', error);
       console.error('Error processing private message:', error);
