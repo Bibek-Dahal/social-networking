@@ -71,7 +71,9 @@ io.on('connection', async (socket) => {
         { _id: chatId },
         { isRead: true },
         { new: true }
-      );
+      )
+        .populate('sender receiver')
+        .select('-password');
 
       io.to(senderId).emit('isRead', { chat: updatedChat });
     } catch (error) {
