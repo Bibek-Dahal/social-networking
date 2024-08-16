@@ -106,7 +106,8 @@ io.on('connection', async (socket) => {
       })
         .populate('sender receiver') // Corrected the spelling here
         .select('-password') // Modified the select method
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .limit(1);
       if (chats.length > 0) {
         io.to(userId).emit('isRead', { chat: chats[0] });
       }
